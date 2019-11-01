@@ -1,0 +1,48 @@
+{
+
+	"manifest_version": 2,
+	"name": "Fn-Find",
+	"version": "1.0",
+	"description": "",
+
+	"applications": {
+		"gecko": {
+			"id": "PAddon@Fn-Find"
+			}
+	},
+
+	"permissions": [
+		"activeTab",
+		"contextMenus",
+		"find",
+		"tabs"
+	],
+
+	"icons": {
+		"48": "icons/border-48.png"
+	},
+
+	"content_scripts": [
+		{
+			"matches": ["<all_urls>"],
+			"js": ["jquery-3.4.1.js", "script-content.js"]
+		}
+	],
+
+	"background": {
+		"scripts": ["script-background.js"]
+	},
+
+	"options_ui": {
+		"page": "options.html",
+		"browser_style": true
+	},
+
+	"commands": {
+		"shortcuts": {
+			"suggested_key": { "default": "Ctrl+Shift+F" },
+			"description": "shortcuts"
+		}
+	}
+
+}
