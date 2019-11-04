@@ -1,21 +1,20 @@
 {
 
 	"manifest_version": 2,
-	"name": "Fn-Find",
+	"name": "test",
 	"version": "1.0",
 	"description": "",
 
 	"applications": {
 		"gecko": {
-			"id": "PAddon@Fn-Find"
+			"id": "PAddon@test"
 			}
 	},
 
 	"permissions": [
-		"activeTab",
-		"contextMenus",
-		"find",
-		"tabs"
+		// "activeTab",
+		// "contextMenus",
+		// "tabs"
 	],
 
 	"icons": {
@@ -32,18 +31,6 @@
 
 	"background": {
 		"scripts": ["script-background.js"]
-	},
-
-	"options_ui": {
-		"page": "options.html",
-		"browser_style": true
-	},
-
-	"commands": {
-		"shortcuts": {
-			"suggested_key": { "default": "Ctrl+Shift+F" },
-			"description": "shortcuts"
-		}
 	}
 
 }
