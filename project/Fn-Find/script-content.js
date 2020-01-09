@@ -1,4 +1,4 @@
-var tmp1 = 0
+let tmp1 = 0
 
 $(() => { // 자동시작
 	// alert('test')
@@ -6,19 +6,14 @@ $(() => { // 자동시작
 
 browser.runtime.onMessage.addListener((message) => {
 	if (message[0] === 'get selection') {
-		tmp1 = window.getSelection().toString()
-		if (tmp1.length) {
+		tmp1 = selectionStringGet()
+		if (tmp1) {
 			browser.runtime.sendMessage(['selection string', tmp1])
 		} else {
 			browser.runtime.sendMessage(['selection string', false])
 		}
 	} else if (message[0] === 'find') {
-		do {
-			var tmp2 = document.getElementsByClassName('tmpClass1')
-			for (var tmp3 of tmp2) {
-				document.body.removeChild(tmp3)
-			}
-		} while (tmp2.length)
+		$('.tmpClass1').remove()
 		if (message[1]) {
 			if (message[1].rects.length <= 1000) {
 				redactAll(message[1].rects)
@@ -30,7 +25,7 @@ browser.runtime.onMessage.addListener((message) => {
 })
 
 function redactRect (rect) {
-	var redaction = document.createElement('div')
+	let redaction = document.createElement('div')
 
 	redaction.className = 'tmpClass1'
 
@@ -52,6 +47,21 @@ function redactAll (rectData) {
 	for (match of rectData) {
 		for (rect of match.rectsAndTexts.rectList) {
 			redactRect(rect)
+		}
+	}
+}
+
+function selectionStringGet () {
+	let selectString = document.getSelection().toString() // 선택된 텍스트 추출
+	if (selectString) {
+		// console.log(selectString)
+		return selectString
+	} else {
+		let selectionElement = document.activeElement // input 등 입력창에서 추출
+		if (selectionElement.value) {
+			selectString = selectionElement.value.substring(selectionElement.selectionStart, selectionElement.selectionEnd)
+			// console.log(selectString)
+			return selectString
 		}
 	}
 }

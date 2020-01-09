@@ -26,7 +26,7 @@ class webDriverFirefox():
 			pass
 		if(not(self.browserRunning)):
 			options = Options()
-			options.add_argument('-headless')
+			# options.add_argument('-headless')
 			self.driver = Firefox(executable_path='./geckodriver', options=options)
 			self.wait = WebDriverWait(self.driver, timeout=10)
 			self.driver.get(self.url)
@@ -49,34 +49,33 @@ class webDriverFirefox():
 		# wait.until(expected.visibility_of_element_located((By.CSS_SELECTOR, '#ires a'))).click()
 		# print(driver.page_source)
 
-	def googleTranslate(self, translateString): # 구글번역
-		driver = self.driver
-		wait = self.wait
-		driver.find_element_by_css_selector('textarea#source.orig.tlid-source-text-input.goog-textarea').clear()
-		wait.until(expected.invisibility_of_element_located((By.CSS_SELECTOR, 'span.tlid-translation.translation')))
-		# driver.get('https://translate.google.com/#auto|ko|{}'.format(translateString))
-		driver.find_element_by_css_selector('textarea#source.orig.tlid-source-text-input.goog-textarea').send_keys(translateString)
-		try:
-			wait.until(expected.visibility_of_element_located((By.CSS_SELECTOR, 'span.tlid-translation.translation')))
-		except:
-			html = driver.page_source
-			driver.find_element_by_css_selector('textarea#source.orig.tlid-source-text-input.goog-textarea').clear()
-			if(sv.select_one('div.result-error', BeautifulSoup(html, 'html.parser'))):
-				return {"data1": sv.select_one('span.tlid-result-error', BeautifulSoup(html, 'html.parser')).text}
-		html = driver.page_source
-		driver.find_element_by_css_selector('textarea#source.orig.tlid-source-text-input.goog-textarea').clear()
-		# driver.implicitly_wait(5)
+	def googleTranslate(self):
+	# def googleTranslate(self, translateString): # 구글번역
+	# 	driver = self.driver
+	# 	wait = self.wait
+	# 	# driver.get('https://translate.google.com/#auto|ko|{}'.format(translateString))
+	# 	driver.find_element_by_css_selector('textarea#source.orig.tlid-source-text-input.goog-textarea').send_keys(translateString)
+	# 	wait.until(expected.visibility_of_element_located((By.CSS_SELECTOR, 'span.tlid-translation.translation span')))
+	# 	html = driver.page_source
+	# 	driver.find_element_by_css_selector('textarea#source.orig.tlid-source-text-input.goog-textarea').clear()
+	# 	# driver.implicitly_wait(5)
+
+		with open('./string.html', 'r', encoding='utf-8') as f:
+			html = f.read()
 
 		select1 = str(sv.select_one('div.homepage-content-wrap', BeautifulSoup(html, 'html.parser'))) # 번역창 분리
 
-		# 1
+		with open('./test.html', 'w', encoding='utf-8') as f:
+			f.write(select1)
+
+		# data1
 		resultString1 = ''
 		select4 = sv.select_one('span.tlid-translation.translation', BeautifulSoup(select1, 'html.parser'))
 		resultString1 = str(select4).replace('<br/>', '<span>\n</span>')
 		resultString1 = BeautifulSoup(resultString1, 'html.parser').text
-		# print(resultString1)
+		print(resultString1)
 
-		# 2
+		# data2
 		resultString2 = ''
 		if('<div class="gt-cd gt-cd-mbd gt-cd-baf" style="display: none;"' in select1):
 			pass
@@ -91,10 +90,34 @@ class webDriverFirefox():
 					resultString2 = resultString2.rstrip(", ")
 					resultString2 += "\n* {} *\n: ".format(data.text)
 			resultString2 = resultString2.lstrip("\n")
-			resultString2 = resultString2.rstrip(", ")
+			# resultString2 = resultString2.rstrip(", ")
+		print(resultString2)
+
+		# # print(html)
+		# select11 = sv.select_one('span.tlid-translation.translation', BeautifulSoup(select1, 'html.parser'))
+		# tmp1 = str(select11).replace('<br/>', '<span>\n</span>')
+		# tmp1 = BeautifulSoup(tmp1, 'html.parser').text
+		# print(tmp1)
+		
+		# resultString2 = ''
+		# if('<div class="gt-lc gt-lc-mobile" style="display: none;">' in select1):
+		# 	pass
+		# elif('<div class="gt-lc gt-lc-mobile" style="">' in select1):
+		# 	select2 = str(sv.select_one('table.gt-baf-table', BeautifulSoup(select1, 'html.parser')))
+		# 	select3 = sv.select('span.gt-cd-pos, span.gt-baf-cell.gt-baf-word-clickable', BeautifulSoup(select2, 'html.parser'))
+		# 	for data in select3:
+		# 		strData = str(data)
+		# 		if('gt-baf-cell' in strData):
+		# 			resultString2 += "{}, ".format(data.text)
+		# 		elif('gt-cd-pos' in strData):
+		# 			resultString2 = resultString2.rstrip(", ")
+		# 			resultString2 += "\n* {} *\n: ".format(data.text)
+		# 	resultString2 = resultString2.lstrip("\n")
+		# 	resultString2 = resultString2.rstrip(", ")
 		# print(resultString2)
 
-		return {"data1": resultString1, "data2": resultString2}
+		# return {"data1": resultString1, "data2": resultString2}
+		return
 
 app = Flask(__name__)
 
@@ -126,7 +149,8 @@ def driverQuit():
 
 if __name__ == '__main__':
 	webDriver1 = webDriverFirefox('https://translate.google.co.kr/#auto|ko')
-	webDriver1.driverRun()
-	app.run(host='0.0.0.0')
+	# webDriver1.driverRun()
+	webDriver1.googleTranslate()
+	# app.run(host='0.0.0.0')
 	# app.run(host='0.0.0.0', port=5000)
 	# app.run(debug=True)

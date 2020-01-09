@@ -25,6 +25,8 @@
 
 	"content_scripts": [
 		{
+			"all_frames": true,
+			"match_about_blank": true,
 			"matches": ["<all_urls>"],
 			"js": ["jquery-3.4.1.min.js", "jquery-ui.min.js", "script-content.js"]
 		}

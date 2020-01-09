@@ -1,0 +1,10 @@
+flask 튜토리얼: http://containertutorials.com/docker-compose/flask-simple-app.html
+
+우분투 공식 이미지
+docker pull ubuntu:18.04
+이미지 생성
+docker build --tag ptmp:flask r:/temp
+	'r:/temp': Dockerfile 경로
+컨테이너 생성
+docker run --name flask -d -p 5000:5000 --restart=unless-stopped ptmp:flask
+	'--restart=unless-stopped': 직접 멈출때까지 자동시작

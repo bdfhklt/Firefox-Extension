@@ -1,20 +1,21 @@
 {
 
 	"manifest_version": 2,
-	"name": "test",
+	"name": "Fn-etc",
 	"version": "1.0",
 	"description": "",
 
 	"applications": {
 		"gecko": {
-			"id": "PAddon@test"
+			"id": "PAddon@Fn-etc"
 			}
 	},
 
 	"permissions": [
-		// "activeTab",
-		// "contextMenus",
-		// "tabs", 
+		"activeTab",
+		"menus",
+		"tabs",
+		"storage",
 		"<all_urls>"
 	],
 
@@ -33,7 +34,12 @@
 	],
 
 	"background": {
-		"scripts": ["script-background.js"]
+		"scripts": ["options.js", "script-background.js"]
+	},
+
+	"options_ui": {
+		"page": "options-page.html",
+		"browser_style": true
 	}
 
 }

@@ -70,17 +70,16 @@ browser.contextMenus.onClicked.addListener((info) => { // 메뉴 클릭 처리
 		cssCode = `.tmpClass1 {background-color: rgba(${rgba})}`
 		browser.tabs.insertCSS({ code: cssCode })
 	} else if (info.menuItemId === 'version') {
-		let version = 'v20191101'
+		let version = 'v20191216'
 		browser.tabs.executeScript({ code: `alert('${version}')` })
 	}
 })
 
-browser.runtime.onMessage.addListener((message) => {
+browser.runtime.onMessage.addListener(async (message) => {
 	if (message[0] === 'selection string') {
 		if (message[1]) {
-			browser.find.find(message[1], { includeRectData: true }).then(test3).then(() => {
-				browser.find.highlightResults()
-			})
+			await browser.find.find(message[1], { includeRectData: true }).then(test3)
+			browser.find.highlightResults()
 		} else {
 			browser.find.removeHighlighting()
 			sendMessageTab('find')
@@ -100,7 +99,7 @@ async function test3 (matches) {
 	// ask the content script to redact matches for us
 	await browser.tabs.sendMessage(tabId, ['find', { rects: matches.rectData }])
 	// await browser.tabs.sendMessage(tabId, {rects: matches.rectData})
-	browser.tabs.insertCSS({ code: '.tmpClass1 {position: fixed; z-index: 999999; left: 98%; width: 1%; height: 5px;}' })
+	browser.tabs.insertCSS({ code: '.tmpClass1 {position: fixed; z-index: 2147483647; left: 98%; width: 1%; height: 5px;}' })
 	browser.tabs.removeCSS({ code: cssCode })
 	rgba = '255, 0, 0, 0.3'
 	cssCode = '.tmpClass1 {background-color: rgba(255, 0, 0, 0.3);}'
