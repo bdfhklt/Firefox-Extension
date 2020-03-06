@@ -13,8 +13,9 @@
 
 	"permissions": [
 		"activeTab",
-		"contextMenus",
+		"menus",
 		"tabs",
+		"notifications",
 		"<all_urls>"
 	],
 
@@ -28,12 +29,12 @@
 			"all_frames": true,
 			"match_about_blank": true,
 			"matches": ["<all_urls>"],
-			"js": ["jquery-3.4.1.min.js", "jquery-ui.min.js", "script-content.js"]
+			"js": ["script-content.js"]
 		}
 	],
 
 	"background": {
-		"scripts": ["script-background.js"]
+		"scripts": ["translate.js", "script-background.js"]
 	}
 
 }
