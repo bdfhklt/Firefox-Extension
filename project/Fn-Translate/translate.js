@@ -5,7 +5,7 @@
 // { tkk, tk
 
 // tkk = (eu = null)
-// tk = (fu() = function)
+// tk = (fu(eu) = function(a){...})
 
 var cu=function(a){return function(){return a}},du=function(a,b){for(var c=0;c<b.length-2;c+=3){var d=b.charAt(c+2);d="a"<=d?d.charCodeAt(0)-87:Number(d);d="+"==b.charAt(c+1)?a>>>d:a<<d;a="+"==b.charAt(c)?a+d&4294967295:a^d}return a},eu=null,fu=function(a){if(null!==eu)var b=eu;else{b=cu(String.fromCharCode(84));var c=cu(String.fromCharCode(75));b=[b(),b()];b[1]=c();b=(eu=window[b.join(c())]||"")||""}var d=cu(String.fromCharCode(116));c=cu(String.fromCharCode(107));d=[d(),d()];d[1]=c();c="&"+d.join("")+
 "=";d=b.split(".");b=Number(d[0])||0;for(var e=[],f=0,g=0;g<a.length;g++){var k=a.charCodeAt(g);128>k?e[f++]=k:(2048>k?e[f++]=k>>6|192:(55296==(k&64512)&&g+1<a.length&&56320==(a.charCodeAt(g+1)&64512)?(k=65536+((k&1023)<<10)+(a.charCodeAt(++g)&1023),e[f++]=k>>18|240,e[f++]=k>>12&63|128):e[f++]=k>>12|224,e[f++]=k>>6&63|128),e[f++]=k&63|128)}a=b;for(f=0;f<e.length;f++)a+=e[f],a=du(a,"+-a^+6");a=du(a,"+-3^+b+-f");a^=Number(d[1])||0;0>a&&(a=(a&2147483647)+2147483648);a%=1E6;return c+(a.toString()+"."+
@@ -74,31 +74,37 @@ https://translate.google.com/translate_a/single?client=webapp&sl=auto&tl=ko&hl=k
 
 
 JSON
-array[0] : 번역
-array[0][n] : n:짧은 문장, 긴 문장 단위들
-array[0][n][0] : * 번역, null check, 줄바꿈 포함 (ex-> "번역\r\n", ex-> "번역\r\n\r\n")
-array[0][n][1] : * 번역 원본, null check, 줄바꿈 포함 (ex-> "xxxx\r\n", ex-> "xxxx\r\n\r\n")
+array[0] : [단어, 짧은 문장, 긴 문장] 번역
+array[0][n] : n:[짧은 문장, 긴 문장]
+array[0][n][0] : ** 번역, n(max):null, 줄바꿈 포함 (ex-> "번역\r\n", ex-> "번역\r\n\r\n")
+array[0][n][1] : * 번역 원본, n(max):null, 줄바꿈 포함 (ex-> "xxxx\r\n", ex-> "xxxx\r\n\r\n")
 
-array[1] : 단어 품사, null check
-array[1][n] : n:다른 품사들
-array[1][n][0] : * 품사
-array[1][n][1][n] : * 의미들
+array[1] : 단어 번역, [짧은 문장, 긴 문장]:null
+array[1][n] : n:품사들
+array[1][n][0] : ** 품사
+array[1][n][1][n] : ** 의미들
 
 array[2] : 언어 code (ex-> "en")
 
-array[5] : 다른 의미, 줄바꿈, null check
-array[5][n] : n:단어, 짧은 문장 단위
+array[5] : [단어, 짧은 문장] 번역, 줄바꿈, 긴 문장:null
+array[5][n] : n:단어, 짧은 문장
 array[5][n][0] : * 번역 원본 or 줄바꿈만 (ex-> "\r\n", ex-> "\r\n\r\n")
-array[5][n][2][n] : n:다른 의미들
-array[5][n][2][n][0] : * 번역
+array[5][n][2] : 줄바꿈만:null
+array[5][n][2][n] : n:의미들
+array[5][n][2][n][0] : ** 번역
 
+note
+	번역 유형: 3가지
+		1. 단어
+		2. 짧은 문장
+		3. 긴 문장
 */
 
 
 /* eslint-enable */
 /* eslint-disable no-unused-vars */
 
-const requestHeader = ['Content-Type', 'application/x-www-form-urlencoded;charset=utf-8']
+const translateRequestHeader = ['Content-Type', 'application/x-www-form-urlencoded;charset=utf-8']
 
 function getTkk () {
 	return eu

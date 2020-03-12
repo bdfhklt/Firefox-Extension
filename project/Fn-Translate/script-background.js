@@ -1,4 +1,4 @@
-let responseJSONArray = []
+let responseJSONArr = []
 
 browser.menus.create({ // 컨텍스트 메뉴 생성
 	id: 'translate',
@@ -6,20 +6,20 @@ browser.menus.create({ // 컨텍스트 메뉴 생성
 	contexts: ['selection']
 })
 browser.menus.create({
-	id: 'notification',
-	title: 'notification',
+	id: 'storage',
+	title: 'storage',
 	contexts: ['all']
 })
-browser.menus.create({
-	id: 'test1',
-	title: 'test1',
-	contexts: ['all']
-})
-browser.menus.create({
-	id: 'test2',
-	title: 'test2',
-	contexts: ['all']
-})
+// browser.menus.create({
+// 	id: 'test1',
+// 	title: 'test1',
+// 	contexts: ['all']
+// })
+// browser.menus.create({
+// 	id: 'test2',
+// 	title: 'test2',
+// 	contexts: ['all']
+// })
 browser.menus.create({
 	id: 'version',
 	title: 'version',
@@ -31,62 +31,80 @@ browser.menus.onClicked.addListener((info, tab) => { // 컨텍스트 메뉴 동�
 	// console.log(tab)
 	// console.log(info.selectionText)
 	// console.log(tab.id)
-	if (info.menuItemId === 'translate') {
-		sendMessageTab('translate')
-	} else if (info.menuItemId === 'notification') {
-		let tmp1 = ''
-		for (let i1 = 1; i1 <= 20; i1++) {
-			let tmp2 = ''
-			for (let i2 = 0; i2 < 10 - String(i1).length; i2++) {
-				tmp2 += 'a'
-			}
-			tmp1 += tmp2 + i1
-		}
-		browser.notifications.create(
-			'notification id1',
-			{
-				type: 'basic',
-				title: tmp1,
-				message: tmp1 // 최대 200char
-			}
-		)
-	} else if (info.menuItemId === 'test1') {
-		translateRequest(info.selectionText)
-		// browser.notifications.create(
-		// 	'notification id1',
-		// 	{
-		// 		type: 'basic',
-		// 		title: 'title1',
-		// 		message: 'message1'
-		// 	}
-		// )
-	} else if (info.menuItemId === 'test2') {
-		console.log(tab)
-	} else if (info.menuItemId === 'version') {
-		let version = 'v20200212'
-		browser.tabs.executeScript({ code: `alert('${version}')` })
+	switch (info.menuItemId) {
+	case 'translate':
+		browser.tabs.sendMessage(tab.id, { id: 'translate' }).catch(error => { // error 처리
+			console.log(error.toString())
+			translateRequest(info.selectionText, () => {
+				let tempString = ''
+				if (responseJSONArr[0][0]) { // 번역
+					responseJSONArr[0][0].forEach(arrElement => {
+						if (arrElement[0]) tempString += arrElement[0]
+					})
+				}
+				if (responseJSONArr[0][1]) { // 단어 번역, 품사
+					responseJSONArr[0][1].forEach(arrElement1 => {
+						tempString += `\n\n${arrElement1[0]}\n`
+						let oneTimeFalse = false
+						arrElement1[1].forEach(arrElement2 => {
+							if (oneTimeFalse) {
+								tempString += ', '
+							} else oneTimeFalse = true
+							tempString += arrElement2
+						})
+					})
+				}
+				browser.notifications.create( // 알림 생성
+					'notification id1',
+					{
+						type: 'basic',
+						title: 'translate',
+						message: tempString // 최대 200char
+					}
+				)
+			})
+		})
+		break
+	case 'storage':
+		browser.tabs.sendMessage(tab.id, { id: 'storage' })
+		break
+	// case 'test1':
+	// 	break
+	// case 'test2':
+	// 	break
+	case 'version': {
+		const version = 'v20200312'
+		browser.tabs.executeScript({ code: `alert('${version}')` }).catch(error => {
+			console.log(error.toString())
+			console.log(version)
+		})
+		break }
 	}
 })
 
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => { // 메시지 리스너
 	if (message.id === 'translate') {
-		console.log(message)
-		console.log(sender)
-		translateRequest(message.selectionText, () => {
-			sendResponse(responseJSONArray)
-		})
-		return true // 'return true' 비동기
+		// console.log(message)
+		// console.log(sender)
+		if (message.selectionText) {
+			translateRequest(message.selectionText, () => {
+				sendResponse(responseJSONArr)
+			})
+		} else {
+			sendResponse(responseJSONArr)
+		}
+		return true // 'return true': 비동기
 	}
 })
 
-async function sendMessageTab (string) { // 활성 탭으로 메시지
-	let activeTabArray = await browser.tabs.query({
-		active: true, currentWindow: true
-	})
-	let tabId = activeTabArray[0].id
+// async function sendMessageTab (string) { // 활성 탭으로 메시지
+// 	let activeTabs = await browser.tabs.query({
+// 		active: true, currentWindow: true
+// 	})
+// 	let tabId = activeTabs[0].id
 
-	await browser.tabs.sendMessage(tabId, { id: string })
-}
+// 	await browser.tabs.sendMessage(tabId, { id: string })
+// }
 
 function tkkRequest (loadendFunction) { // tkk 요청
 	let xhr = new XMLHttpRequest()
@@ -94,7 +112,7 @@ function tkkRequest (loadendFunction) { // tkk 요청
 		if (xhr.readyState === 4 && xhr.status === 200) {
 			// tkk:'439260.900540207'
 			setTkk(/\d+\.\d+/.exec(/tkk:'\d+\.\d+'/.exec(xhr.responseText)[0])[0])
-			console.log(getTkk())
+			// console.log(getTkk())
 		}
 	}
 	xhr.open('GET', 'https://translate.google.com/', true)
@@ -133,28 +151,30 @@ function translateRequest (request, loadendFunction) { // 번역 요청
 			if (xhr.readyState === 4 && xhr.status === 200) {
 				response = xhr.responseText
 				message = response
-				if (responseJSONArray.unshift(JSON.parse(response)) > 5) {
-					responseJSONArray.pop()
+				if (responseJSONArr.unshift(JSON.parse(response)) > 5) {
+					responseJSONArr.pop()
 				}
 				// console.log(response)
 				// console.log(JSON.parse(response))
-				console.log(responseJSONArray)
+				// console.log(responseJSONArr)
 			} else {
 				message = 'error'
 			}
 		}
 		xhr.open('POST', `https://translate.google.com/translate_a/single?client=webapp&sl=auto&tl=ko&hl=ko&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&otf=1&ssel=0&tsel=0&kc=1&tk=${getTk(request)}`, true)
-		xhr.setRequestHeader(requestHeader[0], requestHeader[1])
+		xhr.setRequestHeader(translateRequestHeader[0], translateRequestHeader[1])
 		xhr.send(`q=${encodeURIComponent(request)}`)
 		xhr.onloadend = () => {
-			browser.notifications.create(
-				'notification id1',
-				{
-					type: 'basic',
-					title: 'translate',
-					message: message
-				}
-			)
+			if (message === 'error') {
+				browser.notifications.create(
+					'notification id1',
+					{
+						type: 'basic',
+						title: 'translate',
+						message: message
+					}
+				)
+			}
 			if (loadendFunction) loadendFunction()
 		}
 	}

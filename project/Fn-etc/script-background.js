@@ -1,42 +1,73 @@
-class Counter { // 카운터
+class MainProcess {
 	constructor () {
 		this.count = 0
-		this.activate = false
+		this.activated = false
+		this.interval = null
 	}
 
-	countDown () { // 카운트 다운
-		if (!this.activate) {
-			this.activate = !this.activate
-			const interval = setInterval(() => {
-				// console.log(this.count)
-				if (this.count <= 0) {
-					this.activate = false
-					clearInterval(interval)
-				} else {
-					this.count--
+	async activateInterval (windowId) {
+		if (activated) {
+			const targetWindowTabs = await browser.tabs.query({ windowId: windowId }) // 탭 수 체크
+			// console.log(targetWindowTabs)
+			let count = 0
+			targetWindowTabs.forEach(element => {
+				if (element.url.includes('store.steampowered.com/app')) {
+					count++
 				}
-			}, 1000)
+			})
+			// console.log(count)
+			// console.log(options.values.maxTabs)
+			if (count < options.values.maxTabs) {
+				this.count = options.values.maxTabs - count
+				if (!this.activated && this.count) {
+					this.activated = true
+					createTab()
+					this.count--
+					this.interval = setInterval(() => {
+						if (this.count > 0) {
+							createTab()
+							this.count--
+						} else {
+							this.deactivateInterval()
+						}
+					}, options.values.delay * 1000)
+				}
+			}
 		}
+
+		function createTab () {
+			browser.tabs.create({
+				active: false,
+				index: 10,
+				url: 'https://store.steampowered.com/explore/random/',
+				windowId: windowId
+			})
+		}
+	}
+
+	deactivateInterval () {
+		clearInterval(this.interval)
+		this.activated = false
 	}
 }
 
-const counter = new Counter()
-let activate = false;
+const mainProcess = new MainProcess()
+let activated = false;
 
 (() => {
 	getStorage()
 })()
 
 browser.menus.create({ // 컨텍스트 메뉴 생성
-	id: 'activate',
+	id: 'activated',
 	type: 'checkbox',
-	title: 'activate',
+	title: 'activated',
 	contexts: ['all'],
-	checked: activate
+	checked: activated
 })
 browser.menus.create({
-	id: 'starting',
-	title: 'starting',
+	id: 'activate',
+	title: 'activate',
 	contexts: ['all']
 })
 // browser.menus.create({
@@ -50,84 +81,43 @@ browser.menus.create({
 	contexts: ['all']
 })
 
-browser.menus.onClicked.addListener(async (info, tab) => { // 컨텍스트 메뉴 동작
-	console.log(tab)
+browser.menus.onClicked.addListener((info, tab) => { // 컨텍스트 메뉴 동작
+	// console.log(info)
+	// console.log(tab)
 	switch (info.menuItemId) {
-	case 'activate':
-		activate = !activate
+	case 'activated':
+		if (activated) mainProcess.deactivateInterval()
+		activated = !activated
 		break
-	case 'starting': {
-		activate = true
-		browser.menus.update('activate', { checked: activate })
-		const tmp1 = await browser.tabs.query({ active: true, currentWindow: true })
-		for (let i = 0; i < options.values.maxTabs; i++) {
-			setTimeout(() => {
-				if (activate) {
-					createTab(tmp1[0].windowId)
-				}
-			}, 1000 * options.values.delay * i)
-		}
+	case 'activate': {
+		activated = true
+		browser.menus.update('activated', { checked: activated })
+		mainProcess.activateInterval(tab.windowId)
 		break }
 	// case 't1': {
-	// 	// sendMessageTab('t1', 'test')
-	// 	console.log(options)
+	// 	(async () => {
+	// 		const targetWindowTabs = await browser.tabs.query({
+	// 			windowId: tab.windowId
+	// 		})
+	// 		console.log(targetWindowTabs)
+	// 	})()
 	// 	break }
 	case 'version': {
-		const version = 'v20191228'
+		const version = 'v20200309'
 		browser.tabs.executeScript({ code: `alert('${version}')` })
 		break }
 	}
 })
 
 browser.runtime.onMessage.addListener(async (request, sender) => { // 메시지 수신
-	if (activate && request === 'beforeunload') {
-		const tmp1 = await tabQuery()
-		// console.log(tmp1)
-		setTimeout(async () => {
-			const tmp2 = await tabQuery()
-			// console.log(tmp2)
-			if (tmp1 !== tmp2) { // 탭 닫기 확인
-				setTimeout(() => {
-					if (activate) {
-						createTab(sender.tab.windowId)
-					}
-				}, 1000 * counter.count)
-				counter.count += options.values.delay // 딜레이 추가
-				counter.countDown() // 카운트다운
-			}
-		}, 1000)
-		// sendMessageTab('t1', await tabQuery())
-	}
 	// console.log(request)
 	// console.log(sender)
+	if (activated && request === 'beforeunload') {
+		mainProcess.activateInterval(sender.tab.windowId)
+	}
 })
 
-browser.storage.onChanged.addListener((e) => { // 옵션 변경 감지
-	// console.log(e)
+browser.storage.onChanged.addListener((changes) => { // 옵션 변경 감지
+	// console.log(changes)
 	getStorage()
 })
-
-// async function sendMessageTab (id, data) { // 활성 탭으로 메시지 발신
-// 	const activeTabArray = await browser.tabs.query({
-// 		active: true, currentWindow: true
-// 	})
-// 	const tabId = activeTabArray[0].id
-
-// 	await browser.tabs.sendMessage(tabId, { id: id, data: data })
-// }
-
-async function tabQuery () { // 활성창 탭 개수
-	const tmp1 = await browser.tabs.query({
-		currentWindow: true
-	})
-	return tmp1.length
-}
-
-function createTab (windowId) {
-	browser.tabs.create({
-		active: false,
-		index: 10,
-		url: 'https://store.steampowered.com/explore/random/',
-		windowId: windowId
-	})
-}

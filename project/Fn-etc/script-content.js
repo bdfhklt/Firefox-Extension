@@ -6,18 +6,12 @@
 // 	}
 // })
 
-$(() => {
+(() => {
 	if (document.location.href.includes('store.steampowered.com/app')) {
 		window.addEventListener('beforeunload', (event) => { // 이벤트 리스너
 			// event.preventDefault()
 			// console.log(event)
 			browser.runtime.sendMessage('beforeunload') // 백그라운드로 메시지 발신
-			$.ajax({ // 시간 지연
-				type: 'GET',
-				url: 'http://localhost',
-				data: '',
-				async: false
-			})
 		})
 	}
-})
+})()
