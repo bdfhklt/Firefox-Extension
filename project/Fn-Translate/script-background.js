@@ -26,59 +26,79 @@ browser.menus.create({
 	contexts: ['all']
 })
 
-browser.menus.onClicked.addListener((info, tab) => { // 컨텍스트 메뉴 동작
+browser.menus.onClicked.addListener(async (info, tab) => { // 컨텍스트 메뉴 동작
 	// console.log(info)
 	// console.log(tab)
 	// console.log(info.selectionText)
 	// console.log(tab.id)
+	const tabId = (tab && tab.id) || await browser.tabs.query({
+		active: true,
+		currentWindow: true
+	}).then(tabs => {
+		return tabs[0].id
+	})
+	// console.log(tabId)
 	switch (info.menuItemId) {
 	case 'translate':
-		browser.tabs.sendMessage(tab.id, { id: 'translate' }).catch(error => { // error 처리
+		browser.tabs.sendMessage(tabId, { id: info.menuItemId, selectionText: info.selectionText }).catch(error => { // error 처리
 			console.log(error.toString())
-			translateRequest(info.selectionText, () => {
-				let tempString = ''
-				if (responseJSONArr[0][0]) { // 번역
-					responseJSONArr[0][0].forEach(arrElement => {
-						if (arrElement[0]) tempString += arrElement[0]
-					})
-				}
-				if (responseJSONArr[0][1]) { // 단어 번역, 품사
-					responseJSONArr[0][1].forEach(arrElement1 => {
-						tempString += `\n\n${arrElement1[0]}\n`
-						let oneTimeFalse = false
-						arrElement1[1].forEach(arrElement2 => {
-							if (oneTimeFalse) {
-								tempString += ', '
-							} else oneTimeFalse = true
-							tempString += arrElement2
-						})
-					})
-				}
-				browser.notifications.create( // 알림 생성
-					'notification id1',
-					{
-						type: 'basic',
-						title: 'translate',
-						message: tempString // 최대 200char
-					}
-				)
-			})
+			translateRequest(info.selectionText, translateToNotification)
 		})
 		break
 	case 'storage':
-		browser.tabs.sendMessage(tab.id, { id: 'storage' })
+		browser.tabs.sendMessage(tabId, { id: info.menuItemId }).catch(error => { // error 처리
+			console.log(error.toString())
+			translateToNotification()
+		})
 		break
 	// case 'test1':
 	// 	break
 	// case 'test2':
 	// 	break
 	case 'version': {
-		const version = 'v20200312'
+		const version = 'v20200319'
 		browser.tabs.executeScript({ code: `alert('${version}')` }).catch(error => {
 			console.log(error.toString())
-			console.log(version)
+			console.log()
+			browser.notifications.create( // 알림 생성
+				'notification id1',
+				{
+					type: 'basic',
+					title: 'translate',
+					message: version
+				}
+			)
 		})
 		break }
+	}
+
+	function translateToNotification () { // 알림에 번역 표시
+		let tempString = ''
+		if (responseJSONArr[0][0]) { // 번역
+			responseJSONArr[0][0].forEach(arrElement => {
+				if (arrElement[0]) tempString += arrElement[0]
+			})
+		}
+		if (responseJSONArr[0][1]) { // 단어 번역, 품사
+			responseJSONArr[0][1].forEach(arrElement1 => {
+				tempString += `\n\n${arrElement1[0]}\n`
+				let oneTimeFalse = false
+				arrElement1[1].forEach(arrElement2 => {
+					if (oneTimeFalse) {
+						tempString += ', '
+					} else oneTimeFalse = true
+					tempString += arrElement2
+				})
+			})
+		}
+		browser.notifications.create( // 알림 생성
+			'notification id1',
+			{
+				type: 'basic',
+				title: 'translate',
+				message: tempString // 최대 200(char)까지 표시되나 마우스 오버 팝업으로 모두 보기 가능
+			}
+		)
 	}
 })
 

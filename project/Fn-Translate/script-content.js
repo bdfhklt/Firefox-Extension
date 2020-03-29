@@ -35,7 +35,7 @@ let responseJSONArr = [];
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => { // 메시지 리스너
 	switch (message.id) {
 	case 'translate':
-		translate(getSelectionText())
+		translate(message.selectionText)
 		break
 	case 'storage':
 		translate()
