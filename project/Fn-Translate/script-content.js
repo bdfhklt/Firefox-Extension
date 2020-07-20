@@ -38,7 +38,11 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => { // �
 		translate(message.selectionText)
 		break
 	case 'storage':
-		translate()
+		// console.log(window.location)
+		// console.log(window.parent.location)
+		if (window.location === window.parent.location) { // iframe 아니면 true
+			translate()
+		}
 		break
 	}
 })
@@ -103,9 +107,8 @@ async function translate (selectionText) {
 		let oneTimeFalse1 = false
 		responseJSONArr[0][5].forEach(arrElement1 => {
 			if (arrElement1[2]) {
-				if (oneTimeFalse1) {
-					data1.appendChild(document.createTextNode(' '))
-				} else oneTimeFalse1 = true
+				if (oneTimeFalse1) data1.appendChild(document.createTextNode(' '))
+				else oneTimeFalse1 = true
 				data1.insertAdjacentHTML('beforeend', htmlPopupData()) // 데이터 추가
 				const temp1 = document.getElementById(`${name1}-temp`)
 				temp1.removeAttribute('id')
@@ -115,18 +118,23 @@ async function translate (selectionText) {
 					event.stopPropagation()
 					removeElement(document.getElementById(`${name1}-page2`))
 					base.insertAdjacentHTML('beforeend', htmlPopup2()) // 보조 팝업 레이어 추가
+					const data2 = document.getElementById(`${name1}-data2`)
+					const tempArr1 = arrElement1[2].slice()
+					tempArr1.unshift(arrElement1[0]) // 번역 원본
 					let oneTimeFalse2 = false
-					arrElement1[2].forEach(arrElement2 => { // 의미들
-						let data2 = document.getElementById(`${name1}-data2`)
-						if (oneTimeFalse2) {
-							data2.appendChild(document.createTextNode('\n'))
-						} else oneTimeFalse2 = true
+					tempArr1.forEach(arrElement2 => { // 의미들
+						let textContent1 = arrElement2[0]
+						if (oneTimeFalse2) data2.appendChild(document.createTextNode('\n'))
+						else {
+							oneTimeFalse2 = true
+							textContent1 = arrElement2
+						}
 						data2.insertAdjacentHTML('beforeend', htmlPopupData()) // 데이터 추가
 						const temp2 = document.getElementById(`${name1}-temp`)
 						temp2.removeAttribute('id')
-						temp2.textContent = arrElement2[0]
+						temp2.textContent = textContent1
 						temp2.addEventListener('click', () => { // 선택 변경
-							temp1.textContent = arrElement2[0]
+							temp1.textContent = textContent1
 							removeElement(document.getElementById(`${name1}-page2`))
 						})
 					})
@@ -157,9 +165,8 @@ async function translate (selectionText) {
 			let tempString = `${arrElement1[0]}\n`
 			let oneTimeFalse = false
 			arrElement1[1].forEach(arrElement2 => {
-				if (oneTimeFalse) {
-					tempString += ', '
-				} else oneTimeFalse = true
+				if (oneTimeFalse) tempString += ', '
+				else oneTimeFalse = true
 				tempString += arrElement2
 			})
 			data1.insertAdjacentHTML('beforeend', htmlPopupData()) // 데이터 추가

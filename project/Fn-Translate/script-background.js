@@ -1,4 +1,5 @@
 let responseJSONArr = []
+let xid
 
 browser.menus.create({ // 컨텍스트 메뉴 생성
 	id: 'translate',
@@ -56,10 +57,9 @@ browser.menus.onClicked.addListener(async (info, tab) => { // 컨텍스트 메�
 	// case 'test2':
 	// 	break
 	case 'version': {
-		const version = 'v20200319'
+		const version = 'v20200715'
 		browser.tabs.executeScript({ code: `alert('${version}')` }).catch(error => {
 			console.log(error.toString())
-			console.log()
 			browser.notifications.create( // 알림 생성
 				'notification id1',
 				{
@@ -126,13 +126,15 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => { // �
 // 	await browser.tabs.sendMessage(tabId, { id: string })
 // }
 
-function tkkRequest (loadendFunction) { // tkk 요청
+function idRequest (loadendFunction) { // tkk, xid 요청
 	let xhr = new XMLHttpRequest()
 	xhr.onreadystatechange = () => {
 		if (xhr.readyState === 4 && xhr.status === 200) {
 			// tkk:'439260.900540207'
 			setTkk(/\d+\.\d+/.exec(/tkk:'\d+\.\d+'/.exec(xhr.responseText)[0])[0])
 			// console.log(getTkk())
+			xid = /\d+/.exec(/triggered_experiment_ids:\[\d+\]/.exec(xhr.responseText)[0])[0]
+			// console.log(xid)
 		}
 	}
 	xhr.open('GET', 'https://translate.google.com/', true)
@@ -154,8 +156,8 @@ function tkkRequest (loadendFunction) { // tkk 요청
 }
 
 function translateRequest (request, loadendFunction) { // 번역 요청
-	if (!getTkk()) {
-		tkkRequest(translate)
+	if (!(getTkk() && xid)) {
+		idRequest(translate)
 	} else {
 		translate()
 	}
@@ -181,7 +183,7 @@ function translateRequest (request, loadendFunction) { // 번역 요청
 				message = 'error'
 			}
 		}
-		xhr.open('POST', `https://translate.google.com/translate_a/single?client=webapp&sl=auto&tl=ko&hl=ko&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&otf=1&ssel=0&tsel=0&kc=1&tk=${getTk(request)}`, true)
+		xhr.open('POST', `https://translate.google.com/translate_a/single?client=webapp&sl=auto&tl=ko&hl=ko&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=sos&dt=ss&dt=t&otf=2&ssel=0&tsel=0&xid=${xid}&kc=1${getTk(request)}`, true)
 		xhr.setRequestHeader(translateRequestHeader[0], translateRequestHeader[1])
 		xhr.send(`q=${encodeURIComponent(request)}`)
 		xhr.onloadend = () => {
