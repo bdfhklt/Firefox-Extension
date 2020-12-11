@@ -1,9 +1,9 @@
 const name1 = 'fn-translate'
 let pointX = 0
 let pointY = 0
-let responseJSONArr = [];
+let responseJSONArr = []
 
-(() => {
+;(() => {
 	// alert('test')
 	document.addEventListener('mouseup', event => { // 마우스업 이벤트 추가
 		// console.log(event)
@@ -83,7 +83,7 @@ async function translate (selectionText) {
 	// removeElement(document.getElementById(`${name1}-button`)) // 버튼 제거
 	removeElement(document.getElementsByClassName(name1)[0]) // 모든 팝업 제거
 	document.body.insertAdjacentHTML('beforeend', htmlBase())
-	let base = document.getElementsByClassName(name1)[0]
+	const base = document.getElementsByClassName(name1)[0]
 	base.insertAdjacentHTML('beforeend', htmlPopup1()) // 팝업 레이어 추가
 	const data1 = document.getElementById(`${name1}-data1`)
 	data1.insertAdjacentHTML('beforeend', htmlPopupData())
@@ -95,7 +95,7 @@ async function translate (selectionText) {
 	moveToPoint(page1)
 	moveInsideScreen(page1)
 	// crawlerServer()
-	await browser.runtime.sendMessage({ // 번역 요청
+	await browser.runtime.sendMessage({ // 백그라운드로 번역 요청
 		id: 'translate',
 		selectionText: selectionText
 	}).then(response => {
@@ -176,7 +176,7 @@ async function translate (selectionText) {
 		})
 	}
 	moveInsideScreen(page1)
-	dragMoveElement(page1, null, document.getElementById(`${name1}-data1`)) // 드래그 기능 추가
+	dragMoveElement(page1, null, document.getElementById(`${name1}-insidePage`)) // 드래그 기능 추가
 	// console.log('popup')
 
 	// function crawlerServer () { // 크롤러 서버
@@ -268,12 +268,10 @@ function dragMoveElement (movingElement, targetElement, stopElement) { // 드래
 
 function htmlBase () { // 팝업 기초(스타일 초기화)
 	return `
-<div class="${name1}">
+<div class="${name1}" style="all:initial; display: block; ">
 	<style>
-		.${name1}, .${name1} * {all:initial; }
-		.${name1} style {display: none; }
-		.${name1} div {display: block; }
-		.${name1} span {}
+		.${name1} * {all:revert; }
+		.${name1} span {word-break: keep-all; overflow-wrap: break-word; }
 	</style>
 </div>
 `
@@ -290,15 +288,20 @@ function htmlPopup1 () { // 팝업 레이어
 	return `
 <div id="${name1}-page1" style="background-color:rgba(255,255,255,0.9); border: 2px solid; border-radius: 10px; padding: 8px; margin: 10px; position: fixed; z-index: 2147483646; cursor: move; ">
 	<style>
-		.${name1}-text:hover {background-color: rgba(255,255,0,0.3); }
+		.${name1}-text:hover {background-color: rgba(255,255,0,0.2); }
 	</style>
-	<div id="${name1}-data1" style="max-width: 400px; max-height: 300px; overflow: auto; white-space: pre-wrap; "></div>
+	<div id="${name1}-insidePage" style="cursor: auto; ">
+		<div style="margin-bottom: 10px; ">
+			<button type="button">&lt;</button><button type="button">&gt;</button>
+		</div>
+		<div id="${name1}-data1" style="max-width: 400px; max-height: 300px; overflow: auto; white-space: pre-wrap; "></div>
+	</div>
 </div>
 `
 }
 
 function htmlPopupData () {
-	return `<span id="${name1}-temp" class="${name1}-text" style="white-space: pre-wrap; font-family: 돋움체 !important; "></span>`
+	return `<span id="${name1}-temp" class="${name1}-text" style="font-family: 돋움체 !important; "></span>`
 }
 
 function htmlPopup2 () { // 보조 팝업 레이어

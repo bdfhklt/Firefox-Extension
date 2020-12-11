@@ -1,19 +1,22 @@
-let tmp1 = 0
-
-$(() => { // 자동시작
+;(() => { // 자동시작
 	// alert('test')
-})
+})()
 
 browser.runtime.onMessage.addListener((message) => {
 	if (message[0] === 'get selection') {
-		tmp1 = selectionStringGet()
+		let tmp1 = selectionStringGet()
 		if (tmp1) {
 			browser.runtime.sendMessage(['selection string', tmp1])
 		} else {
 			browser.runtime.sendMessage(['selection string', false])
 		}
 	} else if (message[0] === 'find') {
-		$('.tmpClass1').remove()
+		let tmp1 = document.getElementsByClassName('tmpClass1')
+		if (tmp1) {
+			for (const element of tmp1) {
+				element.remove()
+			}
+		}
 		if (message[1]) {
 			if (message[1].rects.length <= 1000) {
 				redactAll(message[1].rects)
@@ -24,7 +27,7 @@ browser.runtime.onMessage.addListener((message) => {
 	}
 })
 
-function redactRect (rect) {
+function redactRect (rect, tmp1) {
 	let redaction = document.createElement('div')
 
 	redaction.className = 'tmpClass1'
@@ -43,10 +46,13 @@ function redactRect (rect) {
 }
 
 function redactAll (rectData) {
-	tmp1 = [document.documentElement.scrollHeight / 100, (document.documentElement.clientHeight - 34) / document.documentElement.clientHeight]
+	let scrollbar = [
+		document.documentElement.scrollHeight / 100,
+		(document.documentElement.clientHeight - 34) / document.documentElement.clientHeight
+	]
 	for (match of rectData) {
 		for (rect of match.rectsAndTexts.rectList) {
-			redactRect(rect)
+			redactRect(rect, scrollbar)
 		}
 	}
 }

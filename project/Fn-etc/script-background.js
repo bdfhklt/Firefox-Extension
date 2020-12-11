@@ -52,9 +52,9 @@ class MainProcess {
 }
 
 const mainProcess = new MainProcess()
-let activated = false;
+let activated = false
 
-(() => {
+;(() => {
 	getStorage()
 })()
 

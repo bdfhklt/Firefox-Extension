@@ -11,11 +11,11 @@ browser.menus.create({
 	title: 'storage',
 	contexts: ['all']
 })
-// browser.menus.create({
-// 	id: 'test1',
-// 	title: 'test1',
-// 	contexts: ['all']
-// })
+browser.menus.create({
+	id: 'test1',
+	title: 'test1',
+	contexts: ['all']
+})
 // browser.menus.create({
 // 	id: 'test2',
 // 	title: 'test2',
@@ -52,8 +52,19 @@ browser.menus.onClicked.addListener(async (info, tab) => { // 컨텍스트 메�
 			translateToNotification()
 		})
 		break
-	// case 'test1':
-	// 	break
+	case 'test1': {
+		let xhr = new XMLHttpRequest()
+		xhr.onreadystatechange = () => {
+			if (xhr.readyState === 4 && xhr.status === 200) {
+				console.log('xhr.responseText')
+				console.log(xhr.responseText)
+				console.log('xhr.responseText')
+			}
+		}
+		xhr.open('GET', 'https://translate.google.com/', true)
+		xhr.send(null)
+		break
+	}
 	// case 'test2':
 	// 	break
 	case 'version': {
@@ -69,7 +80,8 @@ browser.menus.onClicked.addListener(async (info, tab) => { // 컨텍스트 메�
 				}
 			)
 		})
-		break }
+		break
+	}
 	}
 
 	function translateToNotification () { // 알림에 번역 표시
@@ -130,6 +142,7 @@ function idRequest (loadendFunction) { // tkk, xid 요청
 	let xhr = new XMLHttpRequest()
 	xhr.onreadystatechange = () => {
 		if (xhr.readyState === 4 && xhr.status === 200) {
+			// console.log(xhr.responseText)
 			// tkk:'439260.900540207'
 			setTkk(/\d+\.\d+/.exec(/tkk:'\d+\.\d+'/.exec(xhr.responseText)[0])[0])
 			// console.log(getTkk())

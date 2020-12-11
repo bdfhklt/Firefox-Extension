@@ -6,7 +6,7 @@
 // 	}
 // })
 
-(() => {
+;(() => {
 	if (document.location.href.includes('store.steampowered.com/app')) {
 		window.addEventListener('beforeunload', (event) => { // 이벤트 리스너
 			// event.preventDefault()
