@@ -1,20 +1,20 @@
 {
 
 	"manifest_version": 2,
-	"name": "test",
+	"name": "Fn-PrivateWindow",
 	"version": "1.0",
 	"description": "",
 
 	"applications": {
 		"gecko": {
-			"id": "PAddon@test"
+			"id": "PAddon@Fn-PrivateWindow"
 			}
 	},
 
 	"permissions": [
-		// "activeTab",
-		// "menus",
-		// "tabs", 
+		"activeTab",
+		"menus",
+		"tabs",
 		"<all_urls>"
 	],
 
