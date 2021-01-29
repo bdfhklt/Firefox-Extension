@@ -86,7 +86,9 @@ browser.menus.onClicked.addListener((info, tab) => { // 컨텍스트 메뉴 동�
 	// console.log(tab)
 	switch (info.menuItemId) {
 	case 'activated':
-		if (activated) mainProcess.deactivateInterval()
+		if (activated) {
+			mainProcess.deactivateInterval()
+		}
 		activated = !activated
 		break
 	case 'activate': {

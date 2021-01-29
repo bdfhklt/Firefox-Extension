@@ -88,7 +88,9 @@ browser.menus.onClicked.addListener(async (info, tab) => { // 컨텍스트 메�
 		let tempString = ''
 		if (responseJSONArr[0][0]) { // 번역
 			responseJSONArr[0][0].forEach(arrElement => {
-				if (arrElement[0]) tempString += arrElement[0]
+				if (arrElement[0]) {
+					tempString += arrElement[0]
+				}
 			})
 		}
 		if (responseJSONArr[0][1]) { // 단어 번역, 품사
@@ -98,7 +100,9 @@ browser.menus.onClicked.addListener(async (info, tab) => { // 컨텍스트 메�
 				arrElement1[1].forEach(arrElement2 => {
 					if (oneTimeFalse) {
 						tempString += ', '
-					} else oneTimeFalse = true
+					} else {
+						oneTimeFalse = true
+					}
 					tempString += arrElement2
 				})
 			})
@@ -154,7 +158,9 @@ function idRequest (loadendFunction) { // tkk, xid 요청
 	xhr.send()
 	xhr.onloadend = () => {
 		if (getTkk()) {
-			if (loadendFunction) loadendFunction()
+			if (loadendFunction) {
+				loadendFunction()
+			}
 		} else {
 			browser.notifications.create(
 				'notification id1',
@@ -210,7 +216,9 @@ function translateRequest (request, loadendFunction) { // 번역 요청
 					}
 				)
 			}
-			if (loadendFunction) loadendFunction()
+			if (loadendFunction) {
+				loadendFunction()
+			}
 		}
 	}
 }

@@ -1,11 +1,12 @@
 let targetWindowId = browser.windows.WINDOW_ID_NONE
+let menu1
 
 browser.menus.create({ // 컨텍스트 메뉴 생성
 	id: 'openInPrivateWindow',
 	title: 'Open in Private Window',
 	contexts: ['link']
 })
-let menu1 = browser.menus.create({
+menu1 = browser.menus.create({
 	id: 'setTargetWindow',
 	title: 'Set Target Window',
 	contexts: ['page'],
@@ -18,9 +19,9 @@ let menu1 = browser.menus.create({
 // })
 
 browser.menus.onShown.addListener((menuInfo, tabInfo) => { // 컨텍스트 메뉴 감지
-	console.log(menuInfo)
-	console.log(tabInfo)
-	if (tabInfo.incognito) {
+	// console.log(menuInfo)
+	// console.log(tabInfo)
+	if (tabInfo.incognito && tabInfo.windowId !== targetWindowId) {
 		browser.menus.update(menu1, {
 			visible: true
 		}).then(() => {
@@ -43,14 +44,14 @@ browser.menus.onClicked.addListener((menuInfo, tabInfo) => { // 컨텍스트 메
 		browser.windows.get(targetWindowId).then((windowInfo) => { // 타겟 윈도우 확인
 			// console.log(windowInfo)
 			browser.tabs.create({
-				active: false,
+				// active: false,
 				windowId: targetWindowId,
 				url: menuInfo.linkUrl
 			})
 		}, (errorMessage) => { // 타겟 윈도우가 없으면
 			// console.log(errorMessage)
 			browser.windows.create({
-				// focused: false // 작동 안함(v78.6.0esr) !
+				// focused: false // ! 작동 안함(v78.6.0esr)
 				incognito: true,
 				url: menuInfo.linkUrl
 			}).then((windowInfo) => {
@@ -59,11 +60,11 @@ browser.menus.onClicked.addListener((menuInfo, tabInfo) => { // 컨텍스트 메
 				browser.windows.update(tabInfo.windowId, {
 					focused: true
 				})
-				// .then((windowInfo) => {
-				// 	// console.log(windowInfo)
-				// }, (errorMessage) => {
-				// 	// console.log(errorMessage)
-				// })
+				setTimeout(() => {
+					browser.windows.update(targetWindowId, {
+						state: 'minimized'
+					})
+				}, 1000)
 			}, (errorMessage) => {
 				// console.log(errorMessage)
 			})

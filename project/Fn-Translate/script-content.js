@@ -107,8 +107,11 @@ async function translate (selectionText) {
 		let oneTimeFalse1 = false
 		responseJSONArr[0][5].forEach(arrElement1 => {
 			if (arrElement1[2]) {
-				if (oneTimeFalse1) data1.appendChild(document.createTextNode(' '))
-				else oneTimeFalse1 = true
+				if (oneTimeFalse1) {
+					data1.appendChild(document.createTextNode(' '))
+				} else {
+					oneTimeFalse1 = true
+				}
 				data1.insertAdjacentHTML('beforeend', htmlPopupData()) // 데이터 추가
 				const temp1 = document.getElementById(`${name1}-temp`)
 				temp1.removeAttribute('id')
@@ -124,8 +127,9 @@ async function translate (selectionText) {
 					let oneTimeFalse2 = false
 					tempArr1.forEach(arrElement2 => { // 의미들
 						let textContent1 = arrElement2[0]
-						if (oneTimeFalse2) data2.appendChild(document.createTextNode('\n'))
-						else {
+						if (oneTimeFalse2) {
+							data2.appendChild(document.createTextNode('\n'))
+						} else {
 							oneTimeFalse2 = true
 							textContent1 = arrElement2
 						}
@@ -152,7 +156,9 @@ async function translate (selectionText) {
 	} else if (responseJSONArr[0][0]) { // 긴 문장 번역
 		let tempString = ''
 		responseJSONArr[0][0].forEach(arrElement => {
-			if (arrElement[0]) tempString += arrElement[0]
+			if (arrElement[0]) {
+				tempString += arrElement[0]
+			}
 		})
 		data1.insertAdjacentHTML('beforeend', htmlPopupData()) // 데이터 추가
 		const temp1 = document.getElementById(`${name1}-temp`)
@@ -165,8 +171,11 @@ async function translate (selectionText) {
 			let tempString = `${arrElement1[0]}\n`
 			let oneTimeFalse = false
 			arrElement1[1].forEach(arrElement2 => {
-				if (oneTimeFalse) tempString += ', '
-				else oneTimeFalse = true
+				if (oneTimeFalse) {
+					tempString += ', '
+				} else {
+					oneTimeFalse = true
+				}
 				tempString += arrElement2
 			})
 			data1.insertAdjacentHTML('beforeend', htmlPopupData()) // 데이터 추가
@@ -205,7 +214,9 @@ async function translate (selectionText) {
 }
 
 function removeElement (element) {
-	if (element) element.remove()
+	if (element) {
+		element.remove()
+	}
 }
 
 function moveToPoint (element) { // 지정된 지점으로 이동
@@ -220,10 +231,18 @@ function moveInsideScreen (element) { // 화면 내부로 이동
 	element.style.top = '0px'
 	const maxLeft = window.innerWidth - (element.offsetWidth + parseInt(element.style.marginLeft) + parseInt(element.style.marginRight))
 	const maxTop = window.innerHeight - (element.offsetHeight + parseInt(element.style.marginTop) + parseInt(element.style.marginBottom))
-	if (elementLeft > maxLeft) elementLeft = maxLeft
-	if (elementTop > maxTop) elementTop = maxTop
-	if (elementLeft < 0) elementLeft = 0
-	if (elementTop < 0) elementTop = 0
+	if (elementLeft > maxLeft) {
+		elementLeft = maxLeft
+	}
+	if (elementTop > maxTop) {
+		elementTop = maxTop
+	}
+	if (elementLeft < 0) {
+		elementLeft = 0
+	}
+	if (elementTop < 0) {
+		elementTop = 0
+	}
 	element.style.left = `${elementLeft}px` // 이동
 	element.style.top = `${elementTop}px`
 }
