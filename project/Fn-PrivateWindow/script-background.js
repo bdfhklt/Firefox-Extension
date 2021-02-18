@@ -61,10 +61,14 @@ browser.menus.onClicked.addListener((menuInfo, tabInfo) => { // 컨텍스트 메
 					focused: true
 				})
 				setTimeout(() => {
-					browser.windows.update(targetWindowId, {
-						state: 'minimized'
+					browser.windows.getCurrent().then((currentWindowInfo) => {
+						if (currentWindowInfo.id !== targetWindowId) {
+							browser.windows.update(targetWindowId, {
+								state: 'minimized'
+							})
+						}
 					})
-				}, 1000)
+				}, 4000)
 			}, (errorMessage) => {
 				// console.log(errorMessage)
 			})
