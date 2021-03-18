@@ -50,8 +50,8 @@ function redactAll (rectData) {
 		document.documentElement.scrollHeight / 100,
 		(document.documentElement.clientHeight - 34) / document.documentElement.clientHeight
 	]
-	for (match of rectData) {
-		for (rect of match.rectsAndTexts.rectList) {
+	for (const match of rectData) {
+		for (const rect of match.rectsAndTexts.rectList) {
 			redactRect(rect, scrollbar)
 		}
 	}

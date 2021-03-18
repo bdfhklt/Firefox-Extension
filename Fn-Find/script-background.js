@@ -1,16 +1,8 @@
-var cssCode = ''
-var rgba = ''
+let cssCode = ''
+let rgba = ''
 
-let gettingAllCommands = browser.commands.getAll()
-gettingAllCommands.then((commands) => {
-	for (let command of commands) {
-		// Note that this logs to the Add-on Debugger's console: https://developer.mozilla.org/en-US/Add-ons/WebExtensions/Debugging
-		// not the regular Web console.
-		console.log(command)
-	}
-})
 browser.commands.onCommand.addListener((command) => {
-	if (command === 'shortcuts') {
+	if (command === 'shortcut1') {
 		// browser.tabs.executeScript({code:
 		//  'var tmp1 = []'
 		// + 'tmp1.push(\'find\')'

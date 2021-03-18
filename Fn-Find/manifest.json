@@ -2,7 +2,7 @@
 
 	"manifest_version": 2,
 	"name": "Fn-Find",
-	"version": "1.0",
+	"version": "20210311a",
 	"description": "",
 
 	"applications": {
@@ -42,9 +42,9 @@
 	},
 
 	"commands": {
-		"shortcuts": {
+		"shortcut1": {
 			"suggested_key": { "default": "Ctrl+Shift+F" },
-			"description": "shortcuts"
+			"description": "activate"
 		}
 	}
 
