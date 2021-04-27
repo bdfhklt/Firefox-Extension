@@ -1,11 +1,11 @@
 async function updateUI () {
-	let tmp1 = document.querySelectorAll('table tr')
+	let tmp1 = document.querySelectorAll('table#shortcuts tr')
 	for (const element of tmp1) { // 단축키 테이블 비우기
 		element.remove()
 	}
 	let commands = await browser.commands.getAll()
 	for (const [index, command] of commands.entries()) { // 단축키 테이블 작성
-		let clone = document.querySelector('template').content.cloneNode(true)
+		let clone = document.querySelector('table#shortcuts template').content.cloneNode(true)
 		let tmp2 = clone.querySelector('label')
 		tmp2.setAttribute('for', `input${index}`)
 		tmp2.innerText = command.description

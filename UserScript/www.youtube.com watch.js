@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         www.youtube.com watch
-// @version      20210318.13
+// @version      20210319.1
 // @match        https://www.youtube.com/watch?*
 // @grant        unsafeWindow
 // ==/UserScript==
@@ -45,7 +45,7 @@ setTimeout(() => {
 	unsafeWindow.document.querySelector('yt-hotkey-manager.style-scope').onKeyUpEvent_ = null
 
 	document.body.addEventListener('keydown', (event) => {
-		if (event.originalTarget.id === 'movie_player') {
+		if (event.target.id === 'movie_player' || event.target.tagName.toLowerCase() === 'input') {
 			return
 		}
 		let keyDownCheck = true

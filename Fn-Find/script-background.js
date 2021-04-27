@@ -1,7 +1,7 @@
 let cssCode = ''
 let rgba = ''
 
-browser.commands.onCommand.addListener((command) => {
+browser.commands.onCommand.addListener((command) => { // 단축키 사용
 	if (command === 'shortcut1') {
 		// browser.tabs.executeScript({code:
 		//  'var tmp1 = []'
@@ -17,15 +17,15 @@ browser.commands.onCommand.addListener((command) => {
 })
 
 async function sendMessageTab (string) {
-	let activeTabArray = await browser.tabs.query({
+	let activeTabs = await browser.tabs.query({
 		active: true, currentWindow: true
 	})
-	let tabId = activeTabArray[0].id
+	let tabId = activeTabs[0].id
 
 	await browser.tabs.sendMessage(tabId, [string, 0])
 }
 
-browser.contextMenus.create({ // 메뉴 생성
+browser.contextMenus.create({ // 컨텍스트 메뉴 생성
 	id: 'find',
 	title: 'find',
 	contexts: ['selection']
@@ -46,7 +46,7 @@ browser.contextMenus.create({
 	contexts: ['all']
 })
 
-browser.contextMenus.onClicked.addListener((info) => { // 메뉴 클릭 처리
+browser.contextMenus.onClicked.addListener((info) => { // 메뉴 클릭
 	if (info.menuItemId === 'find') {
 		sendMessageTab('get selection')
 	} else if (info.menuItemId === 'remove') {
@@ -81,10 +81,10 @@ browser.runtime.onMessage.addListener(async (message) => {
 
 async function test3 (matches) {
 	// get the active tab ID
-	let activeTabArray = await browser.tabs.query({
+	let activeTabs = await browser.tabs.query({
 		active: true, currentWindow: true
 	})
-	let tabId = activeTabArray[0].id
+	let tabId = activeTabs[0].id
 
 	// execute the content script in the active tab
 	// await browser.tabs.executeScript(tabId, {file: 'js2.js'})

@@ -11,7 +11,7 @@ browser.runtime.onMessage.addListener((message) => {
 			browser.runtime.sendMessage(['selection string', false])
 		}
 	} else if (message[0] === 'find') {
-		let tmp1 = document.getElementsByClassName('tmpClass1')
+		let tmp1 = document.querySelectorAll('.tmpClass1')
 		if (tmp1) {
 			for (const element of tmp1) {
 				element.remove()
