@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         test 1
-// @version      20210430.9
+// @version      20210627.2
 // @match        localhost
 // @grant        GM_setValue
 // @grant        GM_getValue
@@ -10,13 +10,18 @@
 // alert('test 1 script start')
 console.log('test 1 script start')
 
-;(() => {
-	console.log('test 1 function start')
-	GM_setValue('temp1', 'test val1')
-	console.log(GM_getValue('temp1', 'nnnnn'))
-	// GM_deleteValue('temp1')
-	console.log('test 1 function end')
-})()
+// window.open('http://localhost')
+window.addeventListener('message', (event) => {
+	console.log(event)
+})
+
+// ;(() => {
+// 	console.log('test 1 function start')
+// 	GM_setValue('temp1', 'test val1')
+// 	console.log(GM_getValue('temp1', 'nnnnn'))
+// 	// GM_deleteValue('temp1')
+// 	console.log('test 1 function end')
+// })()
 
 // ;(async () => {
 // 	console.log('test 1 async function start')

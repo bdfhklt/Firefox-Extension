@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         www.google.com search options
-// @version      20210430.6
+// @version      20210627.7
 // @match        https://www.google.com/search?*
 // @match        https://www.google.com/preferences?*
 // @grant        unsafeWindow
@@ -10,29 +10,28 @@
 // ==/UserScript==
 
 // 영어 검색 최적화: 검색 설정에서 지역 변경
-switch (window.location.pathname) {
+switch (location.pathname) {
 case '/search':
 	document.addEventListener('DOMContentLoaded', () => {
-		let temp1 = document.querySelector('.Q8LRLc')
-		console.log(temp1)
-		if (!temp1) { // null = 미국
-			if (!GM_getValue('bypass enabled', true)) {
+		let locationName = document.querySelector('.Q8LRLc')
+		if (!locationName) { // null = 미국
+			if (!GM_getValue('option enabled', true)) {
 				gotoPreferencesPage()
 			} else {
-				temp1 = document.querySelector('#Wprf1b')
-				if (temp1) {
-					temp1.addEventListener('click', () => {
-						GM_setValue('bypass enabled', false)
+				locationName = document.querySelector('#Wprf1b')
+				if (locationName) {
+					locationName.addEventListener('click', () => {
+						GM_setValue('option enabled', false)
 						gotoPreferencesPage()
 					})
 				}
 			}
-		} else if (temp1.textContent === '대한민국') {
-			if (GM_getValue('bypass enabled', true)) {
+		} else if (locationName.textContent === '대한민국') {
+			if (GM_getValue('option enabled', true)) {
 				gotoPreferencesPage()
 			} else {
-				temp1.addEventListener('click', () => {
-					GM_setValue('bypass enabled', true)
+				locationName.addEventListener('click', () => {
+					GM_setValue('option enabled', true)
 					gotoPreferencesPage()
 				})
 			}
@@ -49,10 +48,10 @@ case '/search':
 				if (count1 >= 40) {
 					clearInterval(interval1)
 				}
-				let temp2 = document.querySelector('#lb > div:nth-child(1) > g-menu:nth-child(1) > g-menu-item:nth-child(1) > div:nth-child(1) > a:nth-child(1)') // 검색 환경설정 버튼
-				if (temp2) {
+				const gotoPreferencesPageButton = document.querySelector('#lb > div:nth-child(1) > g-menu:nth-child(1) > g-menu-item:nth-child(1) > div:nth-child(1) > a:nth-child(1)') // 검색 환경설정 버튼
+				if (gotoPreferencesPageButton) {
 					clearInterval(interval1)
-					temp2.click() // 검색 설정 페이지로 이동
+					gotoPreferencesPageButton.click() // 검색 설정 페이지로 이동
 				}
 			}, 200)
 		}
@@ -61,25 +60,25 @@ case '/search':
 case '/preferences': {
 	unsafeWindow.alert = () => {} // alert() 제거
 	let count1 = 0
-	let interval1 = setInterval(() => {
+	const interval1 = setInterval(() => {
 		count1++
 		if (count1 >= 40) {
 			clearInterval(interval1)
 		}
-		let temp1 = document.querySelector('input[name=gl]') // 지역 선택 옵션
-		if (temp1) {
+		const optionInput = document.querySelector('input[name=gl]') // 지역 선택 옵션
+		if (optionInput) {
 			clearInterval(interval1)
-			if (GM_getValue('bypass enabled', true)) {
-				temp1.value = 'US' // 미국
+			if (GM_getValue('option enabled', true)) {
+				optionInput.value = 'US' // 미국
 			} else {
-				temp1.value = 'KR' // 대한민국
+				optionInput.value = 'KR' // 대한민국
 			}
-			let interval2 = setInterval(() => {
-				let temp2 = document.querySelector('.goog-inline-block.jfk-button.jfk-button-action')
-				if (temp2) {
+			const interval2 = setInterval(() => {
+				const saveButton = document.querySelector('#form-buttons .jfk-button-action')
+				if (saveButton) {
 					clearInterval(interval2)
 				}
-				temp2.dispatchEvent(new KeyboardEvent('keypress', { keyCode: 13 })) // ['keydown', 'click'] 안됨, {keyCode: 13} = Enter
+				saveButton.dispatchEvent(new KeyboardEvent('keypress', { keyCode: 13 })) // ['keydown', 'click'] 안됨, {keyCode: 13} = Enter
 			}, 200)
 		}
 	}, 200)

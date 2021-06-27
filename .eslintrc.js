@@ -12,7 +12,8 @@ module.exports = {
 	rules: {
 		'no-tabs': 'off',
 		indent: ['error', 'tab'],
-		'prefer-const': 'off',
-		'no-undef': 'off'
+		'prefer-const': 'warn',
+		'no-undef': 'off',
+		'no-multiple-empty-lines': ['error', { max: 2 }]
 	}
 }
