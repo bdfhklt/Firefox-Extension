@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         www.youtube.com watch
-// @version      20210319.1
+// @version      20210319.2
 // @match        https://www.youtube.com/watch?*
 // @grant        unsafeWindow
 // ==/UserScript==
@@ -9,10 +9,10 @@
 let count1 = 0
 const interval1 = setInterval(() => {
 	count1++
-	let tmp1 = document.querySelector('.ytp-autonav-toggle-button[aria-checked="true"]')
-	if (tmp1) {
+	const toggleButton = document.querySelector('.ytp-autonav-toggle-button[aria-checked="true"]')
+	if (toggleButton) {
 		clearInterval(interval1)
-		tmp1.click()
+		toggleButton.click()
 	}
 	if (count1 >= 4) {
 		clearInterval(interval1)

@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name         alldic.daum.net
-// @version      20210318.1
+// @version      20210318.2
 // @match        https://alldic.daum.net/*
 // @grant        none
 // ==/UserScript==
 
 // 단어 발음 재생 2회 -> 1회
 let count1 = 0
-let interval1 = setInterval(() => {
+const interval1 = setInterval(() => {
 	count1++
 	if (count1 >= 8) {
 		clearInterval(interval1)
