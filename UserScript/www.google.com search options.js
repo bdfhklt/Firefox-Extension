@@ -1,11 +1,9 @@
 // ==UserScript==
 // @name         www.google.com search options
-// @version      20210627.7
+// @version      20210720.1
 // @match        https://www.google.com/search?*
 // @match        https://www.google.com/preferences?*
 // @grant        unsafeWindow
-// @grant        GM_setValue
-// @grant        GM_getValue
 // @run-at       document-start
 // ==/UserScript==
 
@@ -14,29 +12,19 @@ switch (location.pathname) {
 case '/search':
 	document.addEventListener('DOMContentLoaded', () => {
 		let locationName = document.querySelector('.Q8LRLc')
-		if (!locationName) { // null = 미국
-			if (!GM_getValue('option enabled', true)) {
-				gotoPreferencesPage()
-			} else {
-				locationName = document.querySelector('#Wprf1b')
-				if (locationName) {
-					locationName.addEventListener('click', () => {
-						GM_setValue('option enabled', false)
-						gotoPreferencesPage()
-					})
-				}
-			}
-		} else if (locationName.textContent === '대한민국') {
-			if (GM_getValue('option enabled', true)) {
-				gotoPreferencesPage()
-			} else {
+		if (locationName) {
+			if (locationName.textContent === '대한민국') {
 				locationName.addEventListener('click', () => {
-					GM_setValue('option enabled', true)
 					gotoPreferencesPage()
 				})
 			}
-		} else {
-			gotoPreferencesPage()
+		} else { // null = 외국
+			locationName = document.querySelector('#Wprf1b')
+			if (locationName) {
+				locationName.addEventListener('click', () => {
+					gotoPreferencesPage()
+				})
+			}
 		}
 
 		function gotoPreferencesPage () {
@@ -57,6 +45,7 @@ case '/search':
 		}
 	})
 	break
+
 case '/preferences': {
 	unsafeWindow.alert = () => {} // alert() 제거
 	let count1 = 0
@@ -68,7 +57,7 @@ case '/preferences': {
 		const optionInput = document.querySelector('input[name=gl]') // 지역 선택 옵션
 		if (optionInput) {
 			clearInterval(interval1)
-			if (GM_getValue('option enabled', true)) {
+			if (optionInput.value === 'KR' || optionInput.value === 'ZZ') { // 'ZZ' = 현재 지역
 				optionInput.value = 'US' // 미국
 			} else {
 				optionInput.value = 'KR' // 대한민국
