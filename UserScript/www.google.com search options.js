@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         www.google.com search options
-// @version      20210720.1
+// @version      20210730.5
 // @match        https://www.google.com/search?*
 // @match        https://www.google.com/preferences?*
 // @grant        unsafeWindow
@@ -11,37 +11,19 @@
 switch (location.pathname) {
 case '/search':
 	document.addEventListener('DOMContentLoaded', () => {
-		let locationName = document.querySelector('.Q8LRLc')
-		if (locationName) {
-			if (locationName.textContent === '대한민국') {
-				locationName.addEventListener('click', () => {
-					gotoPreferencesPage()
-				})
-			}
-		} else { // null = 외국
-			locationName = document.querySelector('#Wprf1b')
-			if (locationName) {
-				locationName.addEventListener('click', () => {
-					gotoPreferencesPage()
-				})
-			}
-		}
-
-		function gotoPreferencesPage () {
-			document.querySelector('#abar_button_opt').removeAttribute('href') // 페이지 이동 방지
-			document.querySelector('#abar_button_opt').click()
-			let count1 = 0
-			const interval1 = setInterval(() => {
-				count1++
-				if (count1 >= 40) {
-					clearInterval(interval1)
-				}
-				const gotoPreferencesPageButton = document.querySelector('#lb > div:nth-child(1) > g-menu:nth-child(1) > g-menu-item:nth-child(1) > div:nth-child(1) > a:nth-child(1)') // 검색 환경설정 버튼
+		const currentRegionRow = document.querySelector('.b0KoTc')
+		if (currentRegionRow) {
+			currentRegionRow.insertAdjacentHTML('afterbegin', '<button id="switchButton" type="button" style="position: absolute; top: -10px; opacity: 0.2;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.2">Switch Region</button>')
+			currentRegionRow.querySelector('#switchButton').addEventListener('click', () => {
+				const gotoPreferencesPageButton = document.querySelector('.VpHku > g-menu-item:nth-child(1) > div:nth-child(1) > a:nth-child(1)')
 				if (gotoPreferencesPageButton) {
-					clearInterval(interval1)
 					gotoPreferencesPageButton.click() // 검색 설정 페이지로 이동
+				} else {
+					console.log('User Script Message: Not Found Element(gotoPreferencesPageButton)')
 				}
-			}, 200)
+			})
+		} else {
+			console.log('User Script Message: Not Found Element(currentRegionRow)')
 		}
 	})
 	break
@@ -49,9 +31,10 @@ case '/search':
 case '/preferences': {
 	unsafeWindow.alert = () => {} // alert() 제거
 	let count1 = 0
+	let count2 = 0
 	const interval1 = setInterval(() => {
 		count1++
-		if (count1 >= 40) {
+		if (count1 > 80) {
 			clearInterval(interval1)
 		}
 		const optionInput = document.querySelector('input[name=gl]') // 지역 선택 옵션
@@ -63,13 +46,17 @@ case '/preferences': {
 				optionInput.value = 'KR' // 대한민국
 			}
 			const interval2 = setInterval(() => {
+				count2++
+				if (count2 > 80) {
+					clearInterval(interval2)
+				}
 				const saveButton = document.querySelector('#form-buttons .jfk-button-action')
 				if (saveButton) {
 					clearInterval(interval2)
 				}
 				saveButton.dispatchEvent(new KeyboardEvent('keypress', { keyCode: 13 })) // ['keydown', 'click'] 안됨, {keyCode: 13} = Enter
-			}, 200)
+			}, 50)
 		}
-	}, 200)
-} break
+	}, 50)
+	break }
 }
