@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         www.google.com search options
-// @version      20210730.5
+// @version      20210817.1
 // @match        https://www.google.com/search?*
 // @match        https://www.google.com/preferences?*
 // @grant        unsafeWindow
@@ -15,7 +15,7 @@ case '/search':
 		if (currentRegionRow) {
 			currentRegionRow.insertAdjacentHTML('afterbegin', '<button id="switchButton" type="button" style="position: absolute; top: -10px; opacity: 0.2;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.2">Switch Region</button>')
 			currentRegionRow.querySelector('#switchButton').addEventListener('click', () => {
-				const gotoPreferencesPageButton = document.querySelector('.VpHku > g-menu-item:nth-child(1) > div:nth-child(1) > a:nth-child(1)')
+				const gotoPreferencesPageButton = document.querySelector('a[href^="/preferences?"]')
 				if (gotoPreferencesPageButton) {
 					gotoPreferencesPageButton.click() // 검색 설정 페이지로 이동
 				} else {
