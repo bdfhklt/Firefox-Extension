@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         www.google.com search options
-// @version      20210817.1
+// @version      20210912.1
 // @match        https://www.google.com/search?*
 // @match        https://www.google.com/preferences?*
 // @grant        unsafeWindow
@@ -30,33 +30,32 @@ case '/search':
 
 case '/preferences': {
 	unsafeWindow.alert = () => {} // alert() 제거
-	let count1 = 0
-	let count2 = 0
-	const interval1 = setInterval(() => {
-		count1++
-		if (count1 > 80) {
-			clearInterval(interval1)
+	waitElement('input[name=gl]', 50, 100, optionInput => { // 지역 선택 옵션
+		if (optionInput.value === 'KR' || optionInput.value === 'ZZ') { // 'ZZ' = 현재 지역
+			optionInput.value = 'US' // 미국
+		} else {
+			optionInput.value = 'KR' // 대한민국
 		}
-		const optionInput = document.querySelector('input[name=gl]') // 지역 선택 옵션
-		if (optionInput) {
-			clearInterval(interval1)
-			if (optionInput.value === 'KR' || optionInput.value === 'ZZ') { // 'ZZ' = 현재 지역
-				optionInput.value = 'US' // 미국
-			} else {
-				optionInput.value = 'KR' // 대한민국
-			}
-			const interval2 = setInterval(() => {
-				count2++
-				if (count2 > 80) {
-					clearInterval(interval2)
-				}
-				const saveButton = document.querySelector('#form-buttons .jfk-button-action')
-				if (saveButton) {
-					clearInterval(interval2)
-				}
-				saveButton.dispatchEvent(new KeyboardEvent('keypress', { keyCode: 13 })) // ['keydown', 'click'] 안됨, {keyCode: 13} = Enter
-			}, 50)
-		}
-	}, 50)
+		waitElement('#form-buttons .jfk-button-action', 50, 100, saveButton => {
+			saveButton.dispatchEvent(new KeyboardEvent('keypress', { keyCode: 13 })) // ['keydown', 'click'] 안됨, {keyCode: 13} = Enter
+		})
+	})
+
 	break }
+}
+
+
+function waitElement (selector, timeout, limit, callback) {
+	let count = 0
+	const interval = setInterval(() => {
+		count++
+		const element = document.querySelector(selector)
+		if (element) {
+			clearInterval(interval)
+			return callback(element)
+		}
+		if (count >= limit) {
+			clearInterval(interval)
+		}
+	}, timeout)
 }
