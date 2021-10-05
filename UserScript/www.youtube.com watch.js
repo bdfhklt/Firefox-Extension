@@ -1,17 +1,18 @@
 // ==UserScript==
 // @name         www.youtube.com watch
-// @version      20210912.23
-// @match        https://www.youtube.com/channel/*
-// @match        https://www.youtube.com/c/*
-// @match        https://www.youtube.com/watch?*
+// @version      20211005.2
+// @match        https://www.youtube.com/*
 // @grant        unsafeWindow
 // ==/UserScript==
 
-const pathname = location.pathname.match(/^\/(channel\/|c\/|watch)/g)
-if (pathname) {
-	switch (location.pathname.match(/^\/(channel\/|c\/|watch)/)[0]) {
-	case '/channel/':
-	case '/c/': {
+const pathnameMatch = location.pathname.match(/^\/[^/]*/)
+if (pathnameMatch) {
+	switch (pathnameMatch[0]) {
+	case '/watch':
+		disableAutoplay()
+		playerControl()
+		break
+	default: {
 		const observer = new MutationObserver((mutationList) => {
 			if (mutationList[0].target.hidden === false) {
 				disableAutoplay()
@@ -22,10 +23,6 @@ if (pathname) {
 			observer.observe(watchElement, { attributeFilter: ['hidden'] })
 		})
 	}
-		break
-	case '/watch':
-		disableAutoplay()
-		playerControl()
 		break
 	}
 }
