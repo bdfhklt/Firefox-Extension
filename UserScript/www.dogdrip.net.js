@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         www.dogdrip.net
-// @version      20210318.1
-// @match        https://www.dogdrip.net/index.php?mid=dogdrip&page=*
+// @version      20211209.1
+// @match        https://www.dogdrip.net/*
 // @grant        none
 // ==/UserScript==
 
