@@ -1,16 +1,18 @@
 // ==UserScript==
 // @name         www.youtube.com watch
-// @version      20220113.36
+// @version      20220115.4
 // @match        https://www.youtube.com/*
 // @grant        unsafeWindow
 // ==/UserScript==
 
-const Player = {
+const Player = { // ! main 보다 위에 위치 !
 	_player: null,
 	get player () {
 		if (!this._player) {
 			return (async () => {
+				// console.log('get player')
 				if (await findElementUsingInterval('#movie_player')) {
+					// console.log('find player')
 					this._player = unsafeWindow.document.querySelector('#movie_player')
 				}
 				return this._player
@@ -49,8 +51,41 @@ const Player = {
 }
 
 
+// main {
+const pathnameMatch = location.pathname.match(/^\/[^/]*/)
+if (pathnameMatch) {
+	const test = !!0
+
+	switch (pathnameMatch[0]) {
+	case '/watch':
+		disableAutoplay()
+		break
+	// case '/embed':
+	// 	break
+	default: {
+		const observer = new MutationObserver((mutationList) => {
+			if (mutationList[0].target.hidden === false) {
+				observer.disconnect()
+				disableAutoplay()
+			}
+		})
+		;(async () => {
+			observer.observe(await findElementUsingInterval('ytd-watch-flexy.style-scope'), { attributeFilter: ['hidden'] })
+		})()
+	}	break
+	}
+	playerControl()
+
+	if (test) {
+		test1()
+	}
+}
+// } main
+
+
 async function test1 () {
 	console.log('test start')
+
 	const player = await Player.player
 
 	// const watchElement = await findElementUsingInterval('ytd-watch-flexy.style-scope')
@@ -59,38 +94,8 @@ async function test1 () {
 	player.addEventListener('onStateChange', param => {
 		console.log(param)
 	})
+
 	console.log('test end')
-}
-
-
-// main
-const pathnameMatch = location.pathname.match(/^\/[^/]*/)
-if (pathnameMatch) {
-	switch (pathnameMatch[0]) {
-	case '/watch':
-		disableAutoplay()
-		playerControl()
-		test1()
-		break
-	case '/embed':
-		playerControl()
-		test1()
-		break
-	default: {
-		const observer = new MutationObserver((mutationList) => {
-			if (mutationList[0].target.hidden === false) {
-				observer.disconnect()
-				disableAutoplay()
-				playerControl()
-			}
-		})
-		test1()
-		;(async () => {
-			observer.observe(await findElementUsingInterval('ytd-watch-flexy.style-scope'), { attributeFilter: ['hidden'] })
-		})()
-	}
-		break
-	}
 }
 
 
@@ -105,7 +110,8 @@ async function playerControl () {
 	const player = await Player.player
 	if (!player) return
 
-	player.append(Player.controlHandle)
+	const playerButtonTab = player.querySelector('.ytp-chrome-bottom')
+	if (playerButtonTab) playerButtonTab.append(Player.controlHandle)
 
 	// 글로벌 핫키 해제, 'onKey*Event_ = () => {}'에서 경고 콘솔 메시지 코드가 있음
 	// unsafeWindow.document.querySelector('yt-hotkey-manager.style-scope').onKeyDownEvent_ = null
@@ -125,16 +131,16 @@ async function playerControl () {
 
 		let keyDownCheck = true
 		switch (event.code) {
-		case 'Space':
-			switch (player.getPlayerState()) {
-			case 1: // 재생 중
-				player.pauseVideo()
-				break
-			case 2: // 일시중지
-				player.playVideo()
-				break
-			}
-			break
+		// case 'Space':
+		// 	switch (player.getPlayerState()) {
+		// 	case 1: // 재생 중
+		// 		player.pauseVideo()
+		// 		break
+		// 	case 2: // 일시중지
+		// 		player.playVideo()
+		// 		break
+		// 	}
+		// 	break
 		case 'ArrowLeft':
 			if (event.shiftKey) {
 				player.seekTo(player.getCurrentTime() - 20)
@@ -213,16 +219,18 @@ function htmlControlHandle () {
 	return `
 <div
 	id="control-handle"
+	tabindex="-1"${'' /* focusable => (addEventListener) event.target */}
 	style="
-		position: fixed;
+		position: absolute;
 		z-index: 2147483647;
 		left: 50%;
-		bottom: 10%;
-		transform: translateX(-50%);
+		top: 50%;
+		transform: translate(-50%, -50%);
 		width: 20px;
 		height: 20px;
+		border-radius: 50%;
+		border: solid 2px rgba(0, 255, 0, 0.25)
 	"
-	tabindex="-1"${'' /* focusable => (addEventListener) event.target */}
 >
 	<style>
 		#control-handle {
