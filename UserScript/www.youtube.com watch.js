@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         www.youtube.com watch
-// @version      20220115.4
+// @version      20220120.1.7
 // @match        https://www.youtube.com/*
 // @grant        unsafeWindow
 // ==/UserScript==
@@ -165,18 +165,26 @@ async function playerControl () {
 		// case 'ArrowDown':
 		// 	player.setVolume(player.getVolume() - 20)
 		// 	break
-		case 'KeyM':
-			if (player.isMuted()) {
-				player.unMute()
-			} else {
-				player.mute()
-			}
-			break
+		// case 'KeyM':
+		// 	if (player.isMuted()) {
+		// 		player.unMute()
+		// 	} else {
+		// 		player.mute()
+		// 	}
+		// 	break
 		case 'NumpadAdd':
-			player.setPlaybackRate((Math.round(player.getPlaybackRate() * 10) / 10) + 0.1)
+			if (player.getPlaybackRate() < 2) {
+				const playbackRate = player.getPlaybackRate() === 0.25 ? 0.3 : player.getPlaybackRate() + 0.1
+				player.setPlaybackRate(Math.round(playbackRate * 100) / 100)
+			}
+			console.log(player.getPlaybackRate())
 			break
 		case 'NumpadSubtract':
-			player.setPlaybackRate((Math.round(player.getPlaybackRate() * 10) / 10) - 0.1)
+			if (player.getPlaybackRate() > 0.25) {
+				const playbackRate = player.getPlaybackRate() === 0.25 ? 0.3 : player.getPlaybackRate() - 0.1
+				player.setPlaybackRate(Math.round(playbackRate * 100) / 100)
+			}
+			console.log(player.getPlaybackRate())
 			break
 		case 'NumpadMultiply':
 			player.setPlaybackRate(1.0)
