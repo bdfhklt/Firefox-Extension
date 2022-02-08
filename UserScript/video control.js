@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         video control
-// @version      20220120.1.26
+// @version      20220131.1.38
 // @match        http*://*/*
 // @grant        none
 // ==/UserScript==
@@ -36,37 +36,77 @@ function videoControl () {
 
 			let keydown = true
 			switch (event.code) {
-			// case 'Space':
-			// 	if (videoElement.paused) videoElement.play()
-			// 	else videoElement.pause()
-			// 	break
+			// 재생, 정지
+			case 'Space':
+				if (videoElement.paused) videoElement.play()
+				else videoElement.pause()
+				break
+
+			// 탐색
 			case 'ArrowLeft':
 				if (event.shiftKey) {
-					videoElement.currentTime = videoElement.currentTime - 20
+					videoElement.currentTime -= 20
 				} else if (event.ctrlKey) {
-					videoElement.currentTime = videoElement.currentTime - 5
+					videoElement.currentTime -= 5
 				} else {
-					videoElement.currentTime = videoElement.currentTime - 1
+					videoElement.currentTime -= 1
 				}
 				break
 			case 'ArrowRight':
 				if (event.shiftKey) {
-					videoElement.currentTime = videoElement.currentTime + 20
+					videoElement.currentTime += 20
 				} else if (event.ctrlKey) {
-					videoElement.currentTime = videoElement.currentTime + 5
+					videoElement.currentTime += 5
 				} else {
-					videoElement.currentTime = videoElement.currentTime + 1
+					videoElement.currentTime += 1
 				}
 				break
-			// case 'ArrowUp':
-			// 	videoElement.volume = videoElement.volume + 0.2
-			// 	break
-			// case 'ArrowDown':
-			// 	videoElement.volume = videoElement.volume - 0.2
-			// 	break
+
+			// 정밀 탐색, 60fps
+			case 'Comma':
+				if (videoElement.paused) {
+					videoElement.currentTime -= 1 / 60
+				} else {
+					videoElement.pause()
+				}
+				break
+			case 'Period':
+				if (videoElement.paused) {
+					videoElement.currentTime += 1 / 60
+				} else {
+					videoElement.pause()
+				}
+				break
+
+			// 특정 지점 탐색
+			case 'Home':
+				videoElement.currentTime = 0
+				break
+			case 'End':
+				if (!videoElement.paused) videoElement.pause()
+				videoElement.currentTime = videoElement.seekable.end(0)
+				break
+
+			// 볼륨
+			case 'ArrowUp':
+				if (videoElement.volume < 1.0) {
+					videoElement.volume = Math.round((videoElement.volume + 0.1) * 10) / 10
+				}
+				console.log(videoElement.volume)
+				break
+			case 'ArrowDown':
+				if (videoElement.volume > 0) {
+					videoElement.volume = Math.round((videoElement.volume - 0.1) * 10) / 10
+				}
+				console.log(videoElement.volume)
+				break
+
+			// 음소거
 			case 'KeyM':
 				videoElement.muted = !videoElement.muted
 				break
+
+			// 재생 속도
 			case 'NumpadAdd':
 				if (videoElement.playbackRate < 4) { // 4.0 초과: 소리가 안남
 					const playbackRate = videoElement.playbackRate === 0.25 ? 0.3 : videoElement.playbackRate + 0.1
@@ -85,6 +125,7 @@ function videoControl () {
 				videoElement.playbackRate = videoElement.defaultPlaybackRate
 				console.log(videoElement.playbackRate)
 				break
+
 			default:
 				keydown = false
 				break

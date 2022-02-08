@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         www.youtube.com watch
-// @version      20220120.1.7
+// @version      20220131.1.8
 // @match        https://www.youtube.com/*
 // @grant        unsafeWindow
 // ==/UserScript==
@@ -20,7 +20,7 @@ const Player = { // ! main 보다 위에 위치 !
 		} else return this._player
 	},
 
-	PlayerState: {
+	State: {
 		UNSTARTED: -1,
 		ENDED: 0,
 		PLAYING: 1,
@@ -126,21 +126,26 @@ async function playerControl () {
 	// Player.controlHandle.addEventListener('mouseup', event => {
 	// 	console.log(event)
 	// })
+
+	// keyboard shortcuts: https://support.google.com/youtube/answer/7631406?hl=ko
 	Player.controlHandle.addEventListener('keydown', event => {
 		// console.log(event)
 
-		let keyDownCheck = true
+		let keydown = true
 		switch (event.code) {
-		// case 'Space':
-		// 	switch (player.getPlayerState()) {
-		// 	case 1: // 재생 중
-		// 		player.pauseVideo()
-		// 		break
-		// 	case 2: // 일시중지
-		// 		player.playVideo()
-		// 		break
-		// 	}
-		// 	break
+		// 재생, 정지
+		case 'Space':
+			switch (player.getPlayerState()) {
+			case Player.State.PLAYING: // 재생 중
+				player.pauseVideo()
+				break
+			case Player.State.PAUSED: // 일시중지
+				player.playVideo()
+				break
+			}
+			break
+
+		// 탐색
 		case 'ArrowLeft':
 			if (event.shiftKey) {
 				player.seekTo(player.getCurrentTime() - 20)
@@ -159,12 +164,26 @@ async function playerControl () {
 				player.seekTo(player.getCurrentTime() + 1)
 			}
 			break
+
+		// 프레임 단위 탐색
+		case 'Comma':
+		case 'Period':
+			if (player.getPlayerState() === Player.State.PLAYING) {
+				player.pauseVideo()
+			} else {
+				keydown = false
+			}
+			break
+
+		// 볼륨
 		// case 'ArrowUp':
 		// 	player.setVolume(player.getVolume() + 20)
 		// 	break
 		// case 'ArrowDown':
 		// 	player.setVolume(player.getVolume() - 20)
 		// 	break
+
+		// 음소거
 		// case 'KeyM':
 		// 	if (player.isMuted()) {
 		// 		player.unMute()
@@ -172,6 +191,8 @@ async function playerControl () {
 		// 		player.mute()
 		// 	}
 		// 	break
+
+		// 재생 속도
 		case 'NumpadAdd':
 			if (player.getPlaybackRate() < 2) {
 				const playbackRate = player.getPlaybackRate() === 0.25 ? 0.3 : player.getPlaybackRate() + 0.1
@@ -191,11 +212,11 @@ async function playerControl () {
 			break
 
 		default:
-			keyDownCheck = false
+			keydown = false
 			break
 		}
 
-		if (keyDownCheck) {
+		if (keydown) {
 			// event.stopImmediatePropagation()
 			event.preventDefault()
 		}
