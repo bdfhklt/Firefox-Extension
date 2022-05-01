@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         video control
-// @version      1.0.48.20220215
+// @version      1.0.50.20220501.5
 // @include      *
 // @grant        none
 // ==/UserScript==
@@ -48,8 +48,17 @@ document.addEventListener('mousedown', event => {
 function addVideoControl (videoElement) {
 	console.log(addVideoControl.name)
 
+	// 이벤트 제거
+	// const tempElement = videoElement.cloneNode(true)
+	// videoElement.parentNode.replaceChild(tempElement, videoElement)
+	// videoElement.remove()
+	// videoElement = tempElement
+
 	// 중복 방지, querySelector('video:not([data-video-control])')
 	videoElement.dataset.videoControl = true
+
+	// 컨트롤 표시
+	videoElement.controls = true
 
 	// 커스텀 컨트롤
 	// videoElement.insertAdjacentHTML('afterend', htmlVideoControls())
@@ -77,11 +86,18 @@ function addVideoControl (videoElement) {
 		// console.log(event)
 
 		let keydown = true
+		let messageText = null
+
 		switch (event.code) {
 		// 재생, 정지
 		case 'Space':
-			if (videoElement.paused) videoElement.play()
-			else videoElement.pause()
+			if (videoElement.paused) {
+				videoElement.play()
+				messageText = '▶'
+			} else {
+				videoElement.pause()
+				messageText = '⏸'
+			}
 			break
 
 		// 탐색
@@ -123,10 +139,12 @@ function addVideoControl (videoElement) {
 		// 특정 지점 탐색
 		case 'Home':
 			videoElement.currentTime = 0
+			messageText = '⏮'
 			break
 		case 'End':
 			if (!videoElement.paused) videoElement.pause()
 			videoElement.currentTime = videoElement.seekable.end(0)
+			messageText = '⏭'
 			break
 
 		// 볼륨
@@ -134,18 +152,25 @@ function addVideoControl (videoElement) {
 			if (videoElement.volume < 1.0) {
 				videoElement.volume = Math.round((videoElement.volume + 0.1) * 10) / 10
 			}
-			console.log(videoElement.volume)
+			// console.log(videoElement.volume)
+			messageText = `${videoElement.volume * 100}%`
 			break
 		case 'ArrowDown':
 			if (videoElement.volume > 0) {
 				videoElement.volume = Math.round((videoElement.volume - 0.1) * 10) / 10
 			}
-			console.log(videoElement.volume)
+			// console.log(videoElement.volume)
+			messageText = `${videoElement.volume * 100}%`
 			break
 
 		// 음소거
 		case 'KeyM':
 			videoElement.muted = !videoElement.muted
+			if (videoElement.muted) {
+				messageText = '🔇'
+			} else {
+				messageText = `${videoElement.volume * 100}%`
+			}
 			break
 
 		// 재생 속도
@@ -154,18 +179,31 @@ function addVideoControl (videoElement) {
 				const playbackRate = videoElement.playbackRate === 0.25 ? 0.3 : videoElement.playbackRate + 0.1
 				videoElement.playbackRate = (Math.round(playbackRate * 100) / 100)
 			}
-			console.log(videoElement.playbackRate)
+			// console.log(videoElement.playbackRate)
+			messageText = `x${videoElement.playbackRate.toFixed(2)}`
 			break
 		case 'NumpadSubtract':
 			if (videoElement.playbackRate > 0.25) { // 0.25 미만: 소리가 안남
 				const playbackRate = videoElement.playbackRate === 0.3 ? 0.25 : videoElement.playbackRate - 0.1
 				videoElement.playbackRate = (Math.round(playbackRate * 100) / 100)
 			}
-			console.log(videoElement.playbackRate)
+			// console.log(videoElement.playbackRate)
+			messageText = `x${videoElement.playbackRate.toFixed(2)}`
 			break
 		case 'NumpadMultiply':
 			videoElement.playbackRate = videoElement.defaultPlaybackRate
-			console.log(videoElement.playbackRate)
+			// console.log(videoElement.playbackRate)
+			messageText = `x${videoElement.playbackRate.toFixed(2)}`
+			break
+
+		// 컨트롤
+		case 'KeyC':
+			videoElement.controls = !videoElement.controls
+			break
+
+		// 반복
+		case 'KeyL':
+			videoElement.loop = !videoElement.loop
 			break
 
 		default:
@@ -176,6 +214,7 @@ function addVideoControl (videoElement) {
 			// console.log('keydown')
 			event.preventDefault()
 		}
+		if (messageText) top.postMessage({ id: 'gui-overlay-message', message: messageText }, '*')
 	})
 }
 

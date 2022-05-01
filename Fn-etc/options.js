@@ -1,5 +1,6 @@
-/* eslint-disable no-unused-vars */
-let options = { // 옵션 초기값
+/* global browser */
+
+const options = { // 옵션 초기값
 	keys: {
 		delay: 25,
 		maxTabs: 5
@@ -8,7 +9,7 @@ let options = { // 옵션 초기값
 }
 
 async function defaultOption () { // 비어있는 옵션 모두 초기화
-	let obj = {}
+	const obj = {}
 	for (const key of Object.keys(options.keys)) {
 		const gettingItem = await browser.storage.local.get(key)
 		if (!gettingItem[key]) {
@@ -19,6 +20,7 @@ async function defaultOption () { // 비어있는 옵션 모두 초기화
 	// console.log('default')
 }
 
+// eslint-disable-next-line no-unused-vars
 function valueType (defaultValue, value) { // 타입 변환
 	const type = typeof defaultValue
 	switch (type) {
@@ -28,6 +30,7 @@ function valueType (defaultValue, value) { // 타입 변환
 	}
 }
 
+// eslint-disable-next-line no-unused-vars
 async function getStorage () { // 옵션 로드
 	// console.log('load')
 	for (const key of Object.keys(options.keys)) {

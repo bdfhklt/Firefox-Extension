@@ -1,9 +1,11 @@
 // ==UserScript==
-// @name         www.youtube.com watch
-// @version      20220131.1.8
+// @name         youtube.com watch
+// @version      1.0.2.20220501.3
 // @match        https://www.youtube.com/*
 // @grant        unsafeWindow
 // ==/UserScript==
+
+/* global unsafeWindow */
 
 const Player = { // ! main 보다 위에 위치 !
 	_player: null,
@@ -11,7 +13,8 @@ const Player = { // ! main 보다 위에 위치 !
 		if (!this._player) {
 			return (async () => {
 				// console.log('get player')
-				if (await findElementUsingInterval('#movie_player')) {
+				const player = await findElementUsingInterval('#movie_player')
+				if (player) {
 					// console.log('find player')
 					this._player = unsafeWindow.document.querySelector('#movie_player')
 				}
@@ -70,7 +73,8 @@ if (pathnameMatch) {
 			}
 		})
 		;(async () => {
-			observer.observe(await findElementUsingInterval('ytd-watch-flexy.style-scope'), { attributeFilter: ['hidden'] })
+			const watchElement = await findElementUsingInterval('ytd-watch-flexy.style-scope')
+			if (watchElement) observer.observe(watchElement, { attributeFilter: ['hidden'] })
 		})()
 	}	break
 	}
@@ -132,15 +136,19 @@ async function playerControl () {
 		// console.log(event)
 
 		let keydown = true
+		let messageText = null
+
 		switch (event.code) {
 		// 재생, 정지
 		case 'Space':
 			switch (player.getPlayerState()) {
 			case Player.State.PLAYING: // 재생 중
 				player.pauseVideo()
+				messageText = '⏸'
 				break
 			case Player.State.PAUSED: // 일시중지
 				player.playVideo()
+				messageText = '▶'
 				break
 			}
 			break
@@ -176,12 +184,14 @@ async function playerControl () {
 			break
 
 		// 볼륨
-		// case 'ArrowUp':
-		// 	player.setVolume(player.getVolume() + 20)
-		// 	break
-		// case 'ArrowDown':
-		// 	player.setVolume(player.getVolume() - 20)
-		// 	break
+		case 'ArrowUp':
+			player.setVolume(player.getVolume() + 10)
+			messageText = `${player.getVolume()}%`
+			break
+		case 'ArrowDown':
+			player.setVolume(player.getVolume() - 10)
+			messageText = `${player.getVolume()}%`
+			break
 
 		// 음소거
 		// case 'KeyM':
@@ -198,28 +208,32 @@ async function playerControl () {
 				const playbackRate = player.getPlaybackRate() === 0.25 ? 0.3 : player.getPlaybackRate() + 0.1
 				player.setPlaybackRate(Math.round(playbackRate * 100) / 100)
 			}
-			console.log(player.getPlaybackRate())
+			// console.log(player.getPlaybackRate())
+			messageText = `x${player.getPlaybackRate().toFixed(2)}`
 			break
 		case 'NumpadSubtract':
 			if (player.getPlaybackRate() > 0.25) {
 				const playbackRate = player.getPlaybackRate() === 0.25 ? 0.3 : player.getPlaybackRate() - 0.1
 				player.setPlaybackRate(Math.round(playbackRate * 100) / 100)
 			}
-			console.log(player.getPlaybackRate())
+			// console.log(player.getPlaybackRate())
+			messageText = `x${player.getPlaybackRate().toFixed(2)}`
 			break
 		case 'NumpadMultiply':
 			player.setPlaybackRate(1.0)
+			// console.log(player.getPlaybackRate())
+			messageText = `x${player.getPlaybackRate().toFixed(2)}`
 			break
 
 		default:
 			keydown = false
 			break
 		}
-
 		if (keydown) {
 			// event.stopImmediatePropagation()
 			event.preventDefault()
 		}
+		if (messageText) top.postMessage({ id: 'gui-overlay-message', message: messageText }, '*')
 	})
 }
 

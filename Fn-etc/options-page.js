@@ -1,5 +1,7 @@
+/* global browser, valueType, options */
+
 function saveOptions (event) { // 옵션 세이브
-	let obj = {}
+	const obj = {}
 	for (const key of Object.keys(options.keys)) {
 		const inputValue = document.getElementById(`option-${key}`).value
 		obj[key] = valueType(options.keys[key], inputValue)

@@ -1,3 +1,5 @@
+/* global browser, options, getStorage */
+
 class MainProcess {
 	constructor () {
 		this.count = 0
@@ -7,11 +9,12 @@ class MainProcess {
 
 	async activateInterval (windowId) {
 		if (activated) {
-			const targetWindowTabs = await browser.tabs.query({ windowId: windowId }) // 탭 수 체크
+			// 탭 수 체크
+			const targetWindowTabs = await browser.tabs.query({ windowId: windowId })
 			// console.log(targetWindowTabs)
 			let count = 0
 			targetWindowTabs.forEach(element => {
-				if (element.url.includes('store.steampowered.com/app')) {
+				if (element.url.startsWith('https://store.steampowered.com/app/')) {
 					count++
 				}
 			})
@@ -19,7 +22,9 @@ class MainProcess {
 			// console.log(options.values.maxTabs)
 			if (count < options.values.maxTabs) {
 				this.count = options.values.maxTabs - count
-				if (!this.activated && this.count) {
+
+				// 활성
+				if (!this.activated && this.count > 0) {
 					this.activated = true
 					createTab()
 					this.count--
