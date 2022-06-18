@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GUI overlay
-// @version      1.0.0.20220501.2
+// @version      1.0.1.20220518.0
 // @include      *
 // @grant        none
 // ==/UserScript==
@@ -66,7 +66,7 @@ class GuiMessage {
 
 	htmlMessage () {
 		return `
-<div id="${name1}-message" style="display: none; position: fixed; left: 40px; bottom: 40px; z-index: 2147483647; opacity: ${messageOpacity}; background-color: #000; padding: 10px 20px;">
+<div id="${name1}-message" style="display: none; position: fixed; left: 40px; bottom: 40px; z-index: 2147483647; opacity: ${messageOpacity}; background-color: #000; padding: 10px 20px; border: medium double #777">
 	<span id="${name1}-message-text" style="font-family: 맑은 고딕, 돋움체 !important; color: #fff; ">message</span>
 </div>
 `
