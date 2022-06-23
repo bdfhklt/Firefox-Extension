@@ -1,8 +1,10 @@
 // ==UserScript==
 // @name         google.com search
-// @version      1.0.3.20220427.0
+// @version      1.0.4.20220621.0
+// @downloadURL  http://localhost:5000/user-script?file-name=google.com search
 // @match        https://www.google.com/search?*
 // @grant        unsafeWindow
+// @noframes
 // ==/UserScript==
 
 // Google USA 전환

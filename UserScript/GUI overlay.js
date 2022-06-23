@@ -1,8 +1,10 @@
 // ==UserScript==
 // @name         GUI overlay
-// @version      1.0.1.20220518.0
+// @version      1.0.2.20220621.0
+// @downloadURL  http://localhost:5000/user-script?file-name=GUI overlay
 // @include      *
 // @grant        none
+// @noframes
 // ==/UserScript==
 
 const messageTimeoutMilliseconds = 2000

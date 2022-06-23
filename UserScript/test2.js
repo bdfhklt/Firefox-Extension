@@ -1,10 +1,12 @@
 // ==UserScript==
 // @name         test 2
-// @version      20220422.0
-// @match        localhost
+// @version      20220621.1
+// @downloadURL  http://localhost:5000/user-script?file-name=test2
+// @match        http://localhost/
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        GM_deleteValue
+// @noframes
 // ==/UserScript==
 
 // eslint-disable-next-line no-unused-vars

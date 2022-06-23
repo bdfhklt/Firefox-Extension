@@ -1,8 +1,10 @@
 // ==UserScript==
 // @name         alldic.daum.net
-// @version      20210318.2
+// @version      1.0.1.20220621.0
+// @downloadURL  http://localhost:5000/user-script?file-name=alldic.daum.net
 // @match        https://alldic.daum.net/*
 // @grant        none
+// @noframes
 // ==/UserScript==
 
 // 단어 발음 재생 2회 -> 1회

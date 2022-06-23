@@ -1,11 +1,14 @@
 // ==UserScript==
 // @name         test 1
-// @version      20220430.19
-// @match        localhost
+// @version      20220621.11
+// @downloadURL  http://localhost:5000/user-script?file-name=test1
+// @match        http://localhost/
 // @grant        unsafeWindow
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        GM_deleteValue
+// @run-at       document-start
+// @noframes
 // ==/UserScript==
 
 // eslint-disable-next-line no-unused-vars
@@ -13,6 +16,28 @@
 
 // alert('test 1 script start')
 console.log('test 1 script start')
+
+/*
+디버거 디텍터 우회
+	regex toString 디텍터
+		디텍터 예시
+		{
+			const reg = / /
+			let isOpen = false
+
+			reg.toString = () => {
+				isOpen = true
+			}
+
+			console.log(reg) // 디버거 열려 있는 동안 계속 감지 됨
+		}
+		우회
+			console.log = () => {}
+
+	중단점 해제 시간 간격을 이용한 디텍터
+		우회
+			디버거 옵션: 중단점 중지
+ */
 
 // window.open('http://localhost')
 // window.addeventListener('message', (event) => {
@@ -26,9 +51,9 @@ console.log('test 1 script start')
 // console.log(top)
 // console.log(window === top)
 
-setTimeout(() => {
-	top.postMessage('test message', '*')
-}, 1000)
+// setTimeout(() => {
+// 	top.postMessage('test message', '*')
+// }, 1000)
 
 // ;(() => {
 // 	console.log('test 1 function start')

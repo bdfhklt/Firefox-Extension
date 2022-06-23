@@ -1,8 +1,10 @@
 // ==UserScript==
 // @name         en.wikipedia.org
-// @version      20210318.1
+// @version      1.0.1.20220621.1
+// @downloadURL  http://localhost:5000/user-script?file-name=en.wikipedia.org
 // @match        https://en.wikipedia.org/*
 // @grant        none
+// @noframes
 // ==/UserScript==
 
 // 페이지 폭 조정

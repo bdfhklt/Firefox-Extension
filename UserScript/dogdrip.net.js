@@ -1,8 +1,10 @@
 // ==UserScript==
 // @name         dogdrip.net
-// @version      1.0.1.20220615.7
+// @version      1.0.2.20220621.0
+// @downloadURL  http://localhost:5000/user-script?file-name=dogdrip.net
 // @match        https://www.dogdrip.net/*
 // @grant        none
+// @noframes
 // ==/UserScript==
 
 // 추천수 비중 하이라이트
