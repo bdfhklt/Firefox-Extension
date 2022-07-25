@@ -1,6 +1,7 @@
 // ==UserScript==
 // @name         namu.wiki
-// @version      1.0.4.20220621.0
+// @icon         https://namu.wiki/favicon.svg
+// @version      1.0.5.20220701.1
 // @downloadURL  http://localhost:5000/user-script?file-name=namu.wiki
 // @match        https://namu.wiki/*
 // @grant        none
@@ -19,13 +20,10 @@ if (!localStorage.theseed_settings) {
 document.addEventListener('DOMContentLoaded', event => {
 	// console.log(event)
 	document.head.appendChild(document.createElement('style')).innerHTML =
-`div[class=""]>div>table>tbody,
-#search-ad {
-	filter: blur(0.25rem);
-	pointer-events: none;
-}
+`div[class=""]>div>table,
+#search-ad,
 iframe[src*="/callad"] {
-	filter: blur(0.5rem) invert(0.45);
+	filter: blur(0.25rem) invert(0.45);
 	pointer-events: none;
 }
 `

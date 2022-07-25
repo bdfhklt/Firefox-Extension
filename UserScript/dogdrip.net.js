@@ -1,6 +1,7 @@
 // ==UserScript==
 // @name         dogdrip.net
-// @version      1.0.2.20220621.0
+// @icon         https://www.dogdrip.net/files/attach/xeicon/mobicon.png
+// @version      1.0.2.20220630.0
 // @downloadURL  http://localhost:5000/user-script?file-name=dogdrip.net
 // @match        https://www.dogdrip.net/*
 // @grant        none

@@ -1,7 +1,8 @@
 // ==UserScript==
 // @name         youtube.com watch
-// @version      1.0.2.20220621.0
-// @downloadURL  http://localhost:5000/user-script?file-name=youtube.com watch
+// @icon         https://www.youtube.com/s/desktop/592786db/img/favicon_144x144.png
+// @version      1.0.2.20220630.0
+// @downloadURL  http://localhost:5000/user-script?file-name=youtube.com-watch
 // @match        https://www.youtube.com/*
 // @grant        unsafeWindow
 // ==/UserScript==

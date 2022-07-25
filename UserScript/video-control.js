@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         video control
 // @version      1.0.2.20220621.0
-// @downloadURL  http://localhost:5000/user-script?file-name=video control
+// @downloadURL  http://localhost:5000/user-script?file-name=video-control
 // @include      *
 // @grant        none
 // ==/UserScript==

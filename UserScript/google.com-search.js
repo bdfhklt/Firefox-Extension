@@ -1,7 +1,8 @@
 // ==UserScript==
 // @name         google.com search
-// @version      1.0.4.20220621.0
-// @downloadURL  http://localhost:5000/user-script?file-name=google.com search
+// @icon         https://www.google.com/favicon.ico
+// @version      1.0.5.20220725.3
+// @downloadURL  http://localhost:5000/user-script?file-name=google.com-search
 // @match        https://www.google.com/search?*
 // @grant        unsafeWindow
 // @noframes
@@ -56,7 +57,15 @@ function findElementUsingInterval (selector, timeout = 500, timeoutCount = 20) {
 function htmlContent1 (params) {
 	return `
 <div style="position: absolute; right: 0px; top: 50%; transform: translate(100%, -50%) translateX(20px);">
-	<button id="switchButton" type="button" style="opacity: 0.2;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.2">Switch Google USA</button>
+	<style>
+		#switchButton {
+			opacity: 0.2;
+		}
+		#switchButton:hover {
+			opacity: 1;
+		}
+	</style>
+	<button id="switchButton" type="button">Switch Google USA</button>
 </div>
 `
 }

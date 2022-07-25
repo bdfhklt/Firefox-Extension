@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         mobile page to pc page
 // @version      1.0.1.20220621.0
-// @downloadURL  http://localhost:5000/user-script?file-name=mobile page to pc page
+// @downloadURL  http://localhost:5000/user-script?file-name=mobile-page-to-pc-page
 // @match        https://m.blog.naver.com/*
 // @grant        none
 // @run-at       document-start
