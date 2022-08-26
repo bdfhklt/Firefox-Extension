@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         google.com search
 // @icon         https://www.google.com/favicon.ico
-// @version      1.0.5.20220725.3
+// @version      1.0.6.20220826.1
 // @downloadURL  http://localhost:5000/user-script?file-name=google.com-search
 // @match        https://www.google.com/search?*
 // @grant        unsafeWindow
@@ -10,7 +10,7 @@
 
 // Google USA 전환
 (async () => {
-	const searchButton = await findElementUsingInterval('button[aria-label^="Google"]')
+	const searchButton = await findElementUsingInterval('button[aria-label]')
 	if (searchButton !== null) {
 		const searchInputBar = searchButton.parentElement.parentElement
 		searchInputBar.insertAdjacentHTML('beforeend', htmlContent1())
