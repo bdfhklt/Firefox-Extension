@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GUI overlay
-// @version      1.0.2.20220621.0
+// @version      1.0.3.20221008.0
 // @downloadURL  http://localhost:5000/user-script?file-name=GUI-overlay
 // @include      *
 // @grant        none
@@ -69,7 +69,7 @@ class GuiMessage {
 	htmlMessage () {
 		return `
 <div id="${name1}-message" style="display: none; position: fixed; left: 40px; bottom: 40px; z-index: 2147483647; opacity: ${messageOpacity}; background-color: #000; padding: 10px 20px; border: medium double #777">
-	<span id="${name1}-message-text" style="font-family: 맑은 고딕, 돋움체 !important; color: #fff; ">message</span>
+	<span id="${name1}-message-text" style="font-family: Segoe UI !important; color: #fff; ">message</span>
 </div>
 `
 	}

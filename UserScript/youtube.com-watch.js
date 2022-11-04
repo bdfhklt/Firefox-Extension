@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         youtube.com watch
 // @icon         https://www.youtube.com/s/desktop/592786db/img/favicon_144x144.png
-// @version      1.0.2.20220630.0
+// @version      1.0.4.20220921.4
 // @downloadURL  http://localhost:5000/user-script?file-name=youtube.com-watch
 // @match        https://www.youtube.com/*
 // @grant        unsafeWindow
@@ -9,7 +9,7 @@
 
 /* global unsafeWindow */
 
-const Player = { // ! main 보다 위에 위치 !
+const Player = {
 	_player: null,
 	get player () {
 		if (!this._player) {
@@ -59,7 +59,7 @@ const Player = { // ! main 보다 위에 위치 !
 // main {
 const pathnameMatch = location.pathname.match(/^\/[^/]*/)
 if (pathnameMatch) {
-	const test = !!0
+	const test = Boolean(0)
 
 	switch (pathnameMatch[0]) {
 	case '/watch':
@@ -80,6 +80,7 @@ if (pathnameMatch) {
 		})()
 	}	break
 	}
+	hideViewMorePopup()
 	playerControl()
 
 	if (test) {
@@ -87,6 +88,11 @@ if (pathnameMatch) {
 	}
 }
 // } main
+
+
+function nameof (object) {
+	return object.toString().split(' ').pop()
+}
 
 
 async function test1 () {
@@ -106,9 +112,23 @@ async function test1 () {
 
 
 // 자동재생 해제
-async function disableAutoplay () {
-	const checkedButton = await findElementUsingInterval('.ytp-autonav-toggle-button[aria-checked="true"]', 2000, 5)
-	if (checkedButton) checkedButton.click()
+function disableAutoplay () {
+	setTimeout(async () => {
+		const checkedButton = await findElementUsingInterval('.ytp-autonav-toggle-button[aria-checked="true"]', 2000, 5)
+		if (checkedButton) {
+			checkedButton.click()
+			console.log(nameof(() => disableAutoplay))
+		}
+	}, 5000)
+}
+
+// 동영상 더보기 숨기기
+async function hideViewMorePopup () {
+	const hideButton = await findElementUsingInterval('button[aria-label="동영상 더보기 숨기기"]')
+	if (hideButton) {
+		hideButton.click()
+		console.log(nameof(() => hideViewMorePopup))
+	}
 }
 
 // 플레이어 컨트롤
@@ -240,22 +260,28 @@ async function playerControl () {
 }
 
 
-// await 사용 가능
-function findElementUsingInterval (selector, timeout = 500, limit = 20) {
+// 요소 찾기, await 사용 가능, v20220921
+function findElementUsingInterval (selector, timeout = 500, timeoutCount = 20) {
 	let count = 0
 	return new Promise((resolve, reject) => {
-		const interval = setInterval(() => {
-			count++
-			const foundElement = document.querySelector(selector)
-			if (foundElement) {
-				clearInterval(interval)
-				resolve(foundElement)
-			}
-			if (count >= limit) {
-				clearInterval(interval)
-				resolve(null)
-			}
-		}, timeout)
+		const foundElement = document.querySelector(selector)
+		if (foundElement) {
+			resolve(foundElement)
+		} else {
+			const interval = setInterval(() => {
+				count++
+				const foundElement = document.querySelector(selector)
+				if (foundElement) {
+					clearInterval(interval)
+					resolve(foundElement)
+				}
+				if (count >= timeoutCount) {
+					clearInterval(interval)
+					console.log(`not found --> ${selector}`)
+					resolve(null)
+				}
+			}, timeout)
+		}
 	})
 }
 
