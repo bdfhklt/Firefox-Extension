@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         namu.wiki
 // @icon         https://namu.wiki/favicon.svg
-// @version      1.0.7.20221104.4
+// @version      1.0.9.20221110.0
 // @downloadURL  http://localhost:5000/user-script?file-name=namu.wiki
 // @match        https://namu.wiki/*
 // @grant        GM_setValue
@@ -53,18 +53,29 @@ document.addEventListener('DOMContentLoaded', event => {
 // }`
 	// CSS 설정
 	const class1Name = GM_getValue(GM_VALUE_CLASS1_NAME, 'xxxx')
+// 	document.head.appendChild(document.createElement('style')).innerHTML = (`
+// .${class1Name} {
+// 	position: relative;
+// }
+// .${class1Name}::after {
+// 	content: "";
+// 	backdrop-filter: blur(0.25rem) invert(0.45);
+// 	position: absolute;
+// 	top: 0px;
+// 	left: 0px;
+// 	width: 100%;
+// 	height: 100%;
+// }
+// `
+// 	)
 	document.head.appendChild(document.createElement('style')).innerHTML = (`
 .${class1Name} {
-	position: relative;
+	filter: blur(0.25rem) invert(0.45);
+	clip-path: inset(0px);
+	user-select: none;
 }
-.${class1Name}::after {
-	content: "";
-	backdrop-filter: blur(0.25rem) invert(0.45);
-	position: absolute;
-	top: 0px;
-	left: 0px;
-	width: 100%;
-	height: 100%;
+.${class1Name} > * {
+	pointer-events: none;
 }
 `
 	)
