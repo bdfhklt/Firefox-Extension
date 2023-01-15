@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         namu.wiki
 // @icon         https://namu.wiki/favicon.svg
-// @version      1.0.9.20221110.0
+// @version      1.0.10.20221226.0
 // @downloadURL  http://localhost:5000/user-script?file-name=namu.wiki
 // @match        https://namu.wiki/*
 // @grant        GM_setValue
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', event => {
 			// 없으면 찾아서 class1Name 업데이트
 			for (const element of document.querySelectorAll(`[href="${location.pathname}"]`)) {
 				if (element._prevClass) {
-					const elementDataset1 = Object.keys(element.dataset)[0]
+					const elementDataset1 = Object.keys(element.dataset)[0].replace(/[A-Z]/g, m => '-' + m.toLowerCase())
 					if (elementDataset1) {
 						GM_setValue(GM_VALUE_CLASS1_NAME, document.querySelector(`[data-${elementDataset1}]`).classList[0])
 						break

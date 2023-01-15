@@ -1,13 +1,19 @@
 // ==UserScript==
 // @name         youtube.com watch
 // @icon         https://www.youtube.com/s/desktop/592786db/img/favicon_144x144.png
-// @version      1.0.4.20220921.4
+// @version      1.0.5.20230107.4
 // @downloadURL  http://localhost:5000/user-script?file-name=youtube.com-watch
 // @match        https://www.youtube.com/*
 // @grant        unsafeWindow
+// @grant        window.close
 // ==/UserScript==
 
 /* global unsafeWindow */
+
+// element id, class name
+const USERSCRIPT_ID = 'userscript-youtube'
+const AUTO_CLOSE_CHECKBOX_CONTAINER = 'auto-close-checkbox-container'
+
 
 const Player = {
 	_player: null,
@@ -82,6 +88,19 @@ if (pathnameMatch) {
 	}
 	hideViewMorePopup()
 	playerControl()
+	createAutoCloseCheckbox()
+
+	// CSS
+	document.head.appendChild(document.createElement('style')).innerHTML = (`
+#${USERSCRIPT_ID}.${AUTO_CLOSE_CHECKBOX_CONTAINER} {
+	position: absolute;
+	right: 0;
+}
+#${USERSCRIPT_ID}.${AUTO_CLOSE_CHECKBOX_CONTAINER} label {
+	font-size: medium;
+}
+`
+	)
 
 	if (test) {
 		test1()
@@ -129,6 +148,37 @@ async function hideViewMorePopup () {
 		hideButton.click()
 		console.log(nameof(() => hideViewMorePopup))
 	}
+}
+
+// 재생 후 자동 닫기 체크박스 생성
+async function createAutoCloseCheckbox () {
+	const checkboxContainer = document.createElement('div')
+	const checkboxLabel = document.createElement('label')
+	const checkbox = document.createElement('input')
+
+	checkboxLabel.textContent = 'auto close'
+	checkbox.type = 'checkbox'
+
+	checkboxContainer.classList.add(AUTO_CLOSE_CHECKBOX_CONTAINER)
+	checkboxContainer.id = USERSCRIPT_ID
+
+	checkboxContainer.append(checkboxLabel, checkbox)
+	const element1 = await findElementUsingInterval('#below')
+	if (element1) element1.prepend(checkboxContainer)
+
+
+	const player = await Player.player
+	if (!player) return
+
+	player.addEventListener('onStateChange', (event) => {
+		// console.log(event)
+		if (event === Player.State.ENDED) {
+			const checkbox = document.querySelector(`#${USERSCRIPT_ID}.${AUTO_CLOSE_CHECKBOX_CONTAINER} > input[type="checkbox"]`)
+			if (checkbox && checkbox.checked) {
+				window.close()
+			}
+		}
+	})
 }
 
 // 플레이어 컨트롤

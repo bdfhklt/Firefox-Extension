@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         video control
-// @version      1.1.3.20221119.111
+// @version      1.1.5.20221202.9
 // @downloadURL  http://localhost:5000/user-script?file-name=video-control
 // @include      *
 // @grant        none
@@ -21,30 +21,13 @@ function getOffset (element, valueType) {
 
 	switch (valueType) {
 	case 'left':
-		// result = element.offsetLeft
-		break
 	case 'right':
-		// result = element.offsetRight
-		break
 	case 'top':
-		// result = element.offsetTop
-		break
 	case 'bottom':
-		// result = element.offsetBottom
 		break
 	default:
 		return 0
 	}
-	// if (result === 0) return 0
-
-	// const value1 = element.getBoundingClientRect()[valueType]
-	// let value2
-	// let target = element
-	// do {
-	// 	target = target.parentElement
-	// 	value2 = target.getBoundingClientRect()[valueType]
-	// 	result = value1 - value2
-	// } while (target.parentElement && result === 0)
 
 	if (element.offsetParent === document.body) {
 		result = element.getBoundingClientRect()[valueType] - document.documentElement.getBoundingClientRect()[valueType]
@@ -59,6 +42,7 @@ function getOffset (element, valueType) {
 class VideoObj {
 	constructor (videoElement) {
 		this.videoElement = videoElement
+		this.videoOverlay = null
 	}
 
 	addVideoControl () {
@@ -76,7 +60,7 @@ class VideoObj {
 		// videoElement.dataset.videoControl = true
 
 		// 컨트롤 표시
-		videoElement.controls = true
+		// videoElement.controls = true
 
 		// 커스텀 컨트롤
 		// videoElement.insertAdjacentHTML('afterend', htmlVideoControls())
@@ -87,7 +71,10 @@ class VideoObj {
 
 		// 테스트, [click, mousedown, mouseup]: firefox의 비디오 컨트롤에서 이벤트 감지 불가
 		// videoElement.addEventListener('click', event => {
-		// 	console.log(event)
+		// 	event.preventDefault()
+		// 	console.log(videoElement, event)
+		// 	// const temp1 = document.querySelector('#temp1')
+		// 	// temp1.focus()
 		// })
 		// videoElement.addEventListener('mousedown', event => {
 		// 	console.log(event)
@@ -247,6 +234,7 @@ class VideoObj {
 			if (keydown) {
 				// console.log('keydown')
 				event.preventDefault()
+				event.stopImmediatePropagation()
 			}
 			const postMessage = () => { if (messageText) top.postMessage({ id: 'gui-overlay-message', message: messageText }, '*') }
 			if (delayedProcess) {
@@ -261,7 +249,8 @@ class VideoObj {
 	}
 
 	addVideoOverlay () {
-		const videoOverlay = document.createElement('div')
+		const videoElement = this.videoElement
+		const videoOverlay = (this.videoOverlay = document.createElement('div'))
 		const videoProgress = document.createElement('progress')
 
 		videoOverlay.id = USERSCRIPT_ID
@@ -270,36 +259,40 @@ class VideoObj {
 		videoOverlay.classList.add(VIDEO_OVERLAY)
 		videoProgress.classList.add(VIDEO_PROGRESS)
 
-		// document.insertAdjacentHTML('before', htmlVideoOverlay())
-
-		// videoOverlay.setAttribute('style', CSS_VIDEO_OVERLAY)
-		// videoProgress.setAttribute('style', CSS_VIDEO_PROGRESS)
-
 		videoOverlay.append(videoProgress)
 
 		const overlayReposition = () => {
-			this.videoElement.after(videoOverlay)
+			if (videoElement.nextSibling !== videoOverlay) videoElement.after(videoOverlay)
 
-			const temp1 = this.videoElement.getBoundingClientRect()
-			if (parseFloat(videoOverlay.style.width)	!== Number(temp1.width.toFixed(3)) ||
-				parseFloat(videoOverlay.style.height)	!== Number(temp1.height.toFixed(3)) ||
-				parseFloat(videoOverlay.style.left)		!== Number(getOffset(this.videoElement, 'left').toFixed(3)) ||
-				parseFloat(videoOverlay.style.top)		!== Number(getOffset(this.videoElement, 'top').toFixed(3))
+			const temp1 = videoElement.getBoundingClientRect()
+			if (videoOverlay.style.width	!== Number(temp1.width.toPrecision(6)) + 'px' ||
+				videoOverlay.style.height	!== Number(temp1.height.toPrecision(6)) + 'px' ||
+				videoOverlay.style.left		!== Number(getOffset(videoElement, 'left').toPrecision(6)) + 'px' ||
+				videoOverlay.style.top		!== Number(getOffset(videoElement, 'top').toPrecision(6)) + 'px'
 			) {
-				videoOverlay.style.display = 'none'
-				setTimeout(() => {
-					this.videoElement.after(videoOverlay)
-
-					videoOverlay.style.removeProperty('display')
-
-					const temp2 = this.videoElement.getBoundingClientRect()
-					videoOverlay.style.width = temp2.width + 'px'
-					videoOverlay.style.height = temp2.height + 'px'
-					videoOverlay.style.left = getOffset(this.videoElement, 'left') + 'px'
-					videoOverlay.style.top = getOffset(this.videoElement, 'top') + 'px'
-				}, 1000)
+				overlayRepositionProcess()
 			}
 		}
+
+		const overlayRepositionProcess = () => {
+			videoOverlay.style.display = 'none'
+
+			if (videoOverlay.timeoutId) clearTimeout(videoOverlay.timeoutId)
+			videoOverlay.timeoutId = setTimeout(() => {
+				videoOverlay.style.removeProperty('display')
+
+				if (videoElement.nextSibling !== videoOverlay) videoElement.after(videoOverlay)
+
+				const temp2 = videoElement.getBoundingClientRect()
+				videoOverlay.style.width =	temp2.width.toPrecision(6) + 'px'
+				videoOverlay.style.height = temp2.height.toPrecision(6) + 'px'
+				videoOverlay.style.left =	getOffset(videoElement, 'left').toPrecision(6) + 'px'
+				videoOverlay.style.top =	getOffset(videoElement, 'top').toPrecision(6) + 'px'
+			}, 600)
+		}
+
+		videoOverlay.resizeObserver = new ResizeObserver(overlayRepositionProcess)
+		videoOverlay.resizeObserver.observe(videoElement)
 
 		videoOverlay.addEventListener('click', (event) => {
 			// console.log(event)
@@ -307,7 +300,7 @@ class VideoObj {
 
 			overlayReposition()
 
-			// this.videoElement.focus({ focusVisible: true })
+			// videoElement.focus({ focusVisible: true })
 		})
 		// videoOverlay.addEventListener('mousedown', (event) => {
 		// 	event.preventDefault()
@@ -316,19 +309,31 @@ class VideoObj {
 		// 	event.preventDefault()
 		// })
 
-		if (this.videoElement.duration) {
-			videoProgress.max = this.videoElement.duration
+		videoProgress.addEventListener('click', (event) => {
+			// console.log(event)
+
+			// video 탐색 이동
+			const temp1 = videoProgress.getBoundingClientRect()
+			const temp2 = getComputedStyle(videoProgress)
+			// 좌표: 0 ~ (width - 1)
+			const temp3 = (event.clientX - (temp1.x + parseFloat(temp2.paddingLeft))) / ((temp1.width - 1) - (parseFloat(temp2.paddingLeft) + parseFloat(temp2.paddingRight)))
+			const temp4 = (temp3 >= 0 && temp3 <= 1) ? temp3 : Math.abs(parseInt(temp3))
+			videoElement.currentTime = videoElement.duration * temp4
+		})
+
+		if (videoElement.duration) {
+			videoProgress.max = videoElement.duration
 			overlayReposition()
 		} else {
-			this.videoElement.addEventListener('durationchange', (event) => {
+			videoElement.addEventListener('durationchange', (event) => {
 				// console.log(event)
-				videoProgress.max = this.videoElement.duration
+				videoProgress.max = videoElement.duration
 				overlayReposition()
 			})
 		}
-		this.videoElement.addEventListener('timeupdate', (event) => {
+		videoElement.addEventListener('timeupdate', (event) => {
 			// console.log(event)
-			videoProgress.value = this.videoElement.currentTime
+			videoProgress.value = videoElement.currentTime
 		})
 	}
 }
@@ -336,33 +341,18 @@ class VideoObj {
 
 // main {
 
-// addHotkey()
-for (const videoElement of document.querySelectorAll('video')) {
-	addVideoObj(videoElement)
-}
-// document.addEventListener('click', event => {
-// 	console.log(event)
-// })
-document.addEventListener('mousedown', event => {
-	// console.log(event)
-	if (event.target.tagName === 'VIDEO') {
-		addVideoObj(event.target)
-	}
-})
-// document.addEventListener('mouseup', event => {
-// 	console.log(event)
-// })
-
 // CSS
 document.head.appendChild(document.createElement('style')).innerHTML = (`
 #${USERSCRIPT_ID}.${VIDEO_OVERLAY} {
-	all: revert;
+	all: initial;
+	display: block;
+
 	position: absolute;
 	z-index: 2147483647;
 	pointer-events: none;
 }
 #${USERSCRIPT_ID}.${VIDEO_OVERLAY}:active {
-	background-color: #ff03;
+	background-color: #ff01;
 }
 #${USERSCRIPT_ID}.${VIDEO_OVERLAY} * {
 	all: revert;
@@ -384,6 +374,29 @@ document.head.appendChild(document.createElement('style')).innerHTML = (`
 }
 `
 )
+
+// addHotkey()
+for (const videoElement of document.querySelectorAll('video')) {
+	addVideoObj(videoElement)
+}
+// document.addEventListener('click', event => {
+// 	console.log(event)
+// })
+document.addEventListener('mousedown', event => {
+	// console.log(event)
+	if (event.target.tagName === 'VIDEO') {
+		addVideoObj(event.target)
+	}
+})
+// document.addEventListener('mouseup', event => {
+// 	console.log(event)
+// })
+
+// const temp1 = document.createElement('div')
+// temp1.id = 'temp1'
+// temp1.style.display = 'none'
+// temp1.tabIndex = 0
+// document.body.append(temp1)
 
 // } main
 
