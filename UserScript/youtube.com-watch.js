@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         youtube.com watch
 // @icon         https://www.youtube.com/s/desktop/592786db/img/favicon_144x144.png
-// @version      1.0.5.20230107.4
+// @version      1.0.7.20230309.25
 // @downloadURL  http://localhost:5000/user-script?file-name=youtube.com-watch
 // @match        https://www.youtube.com/*
 // @grant        unsafeWindow
@@ -13,6 +13,8 @@
 // element id, class name
 const USERSCRIPT_ID = 'userscript-youtube'
 const AUTO_CLOSE_CHECKBOX_CONTAINER = 'auto-close-checkbox-container'
+const CONTROL_KNOB_CONTAINER = 'control-knob-container'
+// const CONTROL_CHECKBOX_CONTAINER = 'control-checkbox-container'
 
 
 const Player = {
@@ -40,25 +42,70 @@ const Player = {
 		CUED: 5
 	},
 
-	_controlHandle: null,
-	get controlHandle () {
-		if (!this._controlHandle) {
-			// this._controlHandle = document.createElement('div')
-			// this._controlHandle.style.position = 'fixed'
-			// this._controlHandle.style.zIndex = '2147483647'
-			// this._controlHandle.style.left = '50%'
-			// this._controlHandle.style.bottom = '10%'
-			// this._controlHandle.style.transform = 'translateX(-50%)'
-			// this._controlHandle.style.width = '20px'
-			// this._controlHandle.style.height = '20px'
-			// this._controlHandle.style.backgroundColor = 'rgba(255,0,0,0.5)'
-			// this._controlHandle.tabIndex = -1 // focusable => (addEventListener) event.target
+	_controlKnob: null,
+	get controlKnob () {
+		if (!this._controlKnob) {
+			// this._controlKnob = document.createElement('div')
+			// this._controlKnob.style.position = 'fixed'
+			// this._controlKnob.style.zIndex = '2147483647'
+			// this._controlKnob.style.left = '50%'
+			// this._controlKnob.style.bottom = '10%'
+			// this._controlKnob.style.transform = 'translateX(-50%)'
+			// this._controlKnob.style.width = '20px'
+			// this._controlKnob.style.height = '20px'
+			// this._controlKnob.style.backgroundColor = 'rgba(255,0,0,0.5)'
+			// this._controlKnob.tabIndex = -1 // focusable => (addEventListener) event.target
 
-			document.body.insertAdjacentHTML('beforeend', htmlControlHandle())
-			this._controlHandle = document.querySelector('#control-handle')
-			return this._controlHandle
-		} else return this._controlHandle
+			// document.body.insertAdjacentHTML('beforeend', htmlControlKnob())
+			// this._controlKnob = document.querySelector('#control-knob')
+
+			const knobContainer = document.createElement('div')
+			const knob = document.createElement('div')
+
+			knob.tabIndex = -1
+
+			knobContainer.classList.add(CONTROL_KNOB_CONTAINER)
+			knobContainer.id = USERSCRIPT_ID
+
+			knobContainer.append(knob)
+
+			// CSS
+			document.head.appendChild(document.createElement('style')).innerHTML = (`
+#${USERSCRIPT_ID}.${CONTROL_KNOB_CONTAINER} {
+	position: absolute;
+	z-index: 2147483647;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+}
+#${USERSCRIPT_ID}.${CONTROL_KNOB_CONTAINER} > div {
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	border: solid 2px rgba(0, 255, 0, 0.25);
+	background-color: rgba(255, 0, 0, 0.25);
+}
+#${USERSCRIPT_ID}.${CONTROL_KNOB_CONTAINER} > div:focus {${'' /* focus, active 순서 중요, visiable: hidden --> focus를 잃음 */}
+	opacity: 0.25;
+}
+#${USERSCRIPT_ID}.${CONTROL_KNOB_CONTAINER} > div:active {
+	opacity: 1;
+	background-color: rgba(0, 255, 0, 0.25);
+}
+`
+			)
+
+			this._controlKnob = knobContainer
+		}
+		return this._controlKnob
 	}
+	// _controlCheckbox: null,
+	// get controlCheckbox () {
+	// 	if (!this._controlCheckbox) {
+	// 		this._controlCheckbox = document.querySelector(`#${USERSCRIPT_ID}. ${CONTROL_CHECKBOX_CONTAINER} input[type="checkbox"]`)
+	// 	}
+	// 	return this._controlCheckbox
+	// }
 }
 
 
@@ -90,18 +137,6 @@ if (pathnameMatch) {
 	playerControl()
 	createAutoCloseCheckbox()
 
-	// CSS
-	document.head.appendChild(document.createElement('style')).innerHTML = (`
-#${USERSCRIPT_ID}.${AUTO_CLOSE_CHECKBOX_CONTAINER} {
-	position: absolute;
-	right: 0;
-}
-#${USERSCRIPT_ID}.${AUTO_CLOSE_CHECKBOX_CONTAINER} label {
-	font-size: medium;
-}
-`
-	)
-
 	if (test) {
 		test1()
 	}
@@ -120,7 +155,7 @@ async function test1 () {
 	const player = await Player.player
 
 	// const watchElement = await findElementUsingInterval('ytd-watch-flexy.style-scope')
-	// watchElement.append(Player.controlHandle)
+	// watchElement.append(Player.controlKnob)
 
 	player.addEventListener('onStateChange', param => {
 		console.log(param)
@@ -153,6 +188,7 @@ async function hideViewMorePopup () {
 // 재생 후 자동 닫기 체크박스 생성
 async function createAutoCloseCheckbox () {
 	const checkboxContainer = document.createElement('div')
+	const checkboxBlock = document.createElement('div')
 	const checkboxLabel = document.createElement('label')
 	const checkbox = document.createElement('input')
 
@@ -162,9 +198,25 @@ async function createAutoCloseCheckbox () {
 	checkboxContainer.classList.add(AUTO_CLOSE_CHECKBOX_CONTAINER)
 	checkboxContainer.id = USERSCRIPT_ID
 
-	checkboxContainer.append(checkboxLabel, checkbox)
+	checkboxContainer.append(checkboxBlock)
+	checkboxBlock.append(checkboxLabel, checkbox)
 	const element1 = await findElementUsingInterval('#below')
 	if (element1) element1.prepend(checkboxContainer)
+
+	// CSS
+	document.head.appendChild(document.createElement('style')).innerHTML = (`
+#${USERSCRIPT_ID}.${AUTO_CLOSE_CHECKBOX_CONTAINER} {
+	position: relative;
+}
+#${USERSCRIPT_ID}.${AUTO_CLOSE_CHECKBOX_CONTAINER} > div {
+	position: absolute;
+	right: 0;
+}
+#${USERSCRIPT_ID}.${AUTO_CLOSE_CHECKBOX_CONTAINER} label {
+	font-size: medium;
+}
+`
+	)
 
 
 	const player = await Player.player
@@ -173,7 +225,7 @@ async function createAutoCloseCheckbox () {
 	player.addEventListener('onStateChange', (event) => {
 		// console.log(event)
 		if (event === Player.State.ENDED) {
-			const checkbox = document.querySelector(`#${USERSCRIPT_ID}.${AUTO_CLOSE_CHECKBOX_CONTAINER} > input[type="checkbox"]`)
+			const checkbox = document.querySelector(`#${USERSCRIPT_ID}.${AUTO_CLOSE_CHECKBOX_CONTAINER} input[type="checkbox"]`)
 			if (checkbox && checkbox.checked) {
 				window.close()
 			}
@@ -187,25 +239,63 @@ async function playerControl () {
 	if (!player) return
 
 	const playerButtonTab = player.querySelector('.ytp-chrome-bottom')
-	if (playerButtonTab) playerButtonTab.append(Player.controlHandle)
+	if (playerButtonTab) playerButtonTab.append(Player.controlKnob)
+
+
+	// 컨트롤 체크박스 생성
+// 	const checkboxContainer = document.createElement('div')
+// 	const checkboxBlock = document.createElement('div')
+// 	const checkboxLabel = document.createElement('label')
+// 	const checkbox = document.createElement('input')
+
+// 	checkboxContainer.tabIndex = -1
+// 	checkboxLabel.textContent = 'custom control'
+// 	checkbox.type = 'checkbox'
+
+// 	checkboxContainer.classList.add(CONTROL_CHECKBOX_CONTAINER)
+// 	checkboxContainer.id = USERSCRIPT_ID
+
+// 	checkboxContainer.append(checkboxBlock)
+// 	checkboxBlock.append(checkboxLabel, checkbox)
+// 	const playerButtonTab = player.querySelector('.ytp-chrome-bottom')
+// 	if (playerButtonTab) playerButtonTab.append(checkboxContainer)
+
+// 	// CSS
+// 	document.head.appendChild(document.createElement('style')).innerHTML = (`
+// #${USERSCRIPT_ID}.${CONTROL_CHECKBOX_CONTAINER} {
+// 	position: absolute;
+// 	z-index: 2147483647;
+// 	left: 50%;
+// 	top: 50%;
+// 	transform: translate(-50%, -50%);
+// }
+// #${USERSCRIPT_ID}.${CONTROL_CHECKBOX_CONTAINER} label {
+// 	font-size: small;
+// }
+// `
+// 	)
+
 
 	// 글로벌 핫키 해제, 'onKey*Event_ = () => {}'에서 경고 콘솔 메시지 코드가 있음
 	// unsafeWindow.document.querySelector('yt-hotkey-manager.style-scope').onKeyDownEvent_ = null
 	// unsafeWindow.document.querySelector('yt-hotkey-manager.style-scope').onKeyUpEvent_ = null
 
-	// Player.controlHandle.addEventListener('click', event => {
+	// Player.controlKnob.addEventListener('click', event => {
 	// 	console.log(event)
 	// })
-	// Player.controlHandle.addEventListener('mousedown', event => {
+	// Player.controlKnob.addEventListener('mousedown', event => {
 	// 	console.log(event)
 	// })
-	// Player.controlHandle.addEventListener('mouseup', event => {
+	// Player.controlKnob.addEventListener('mouseup', event => {
 	// 	console.log(event)
 	// })
 
 	// keyboard shortcuts: https://support.google.com/youtube/answer/7631406?hl=ko
-	Player.controlHandle.addEventListener('keydown', event => {
+	Player.controlKnob.addEventListener('keydown', event => {
+	// document.body.addEventListener('keydown', event => {
 		// console.log(event)
+
+		if (Player.controlCheckbox && !Player.controlCheckbox.checked) return
 
 		let keydown = true
 		let messageText = null
@@ -336,36 +426,35 @@ function findElementUsingInterval (selector, timeout = 500, timeoutCount = 20) {
 }
 
 
-function htmlControlHandle () {
-	return `
-<div
-	id="control-handle"
-	tabindex="-1"${'' /* focusable => (addEventListener) event.target */}
-	style="
-		position: absolute;
-		z-index: 2147483647;
-		left: 50%;
-		top: 50%;
-		transform: translate(-50%, -50%);
-		width: 20px;
-		height: 20px;
-		border-radius: 50%;
-		border: solid 2px rgba(0, 255, 0, 0.25)
-	"
->
-	<style>
-		#control-handle {
-			background-color: rgba(255, 0, 0, 0.25);
-		}
-		#control-handle:focus {${'' /* focus, active 순서 중요 */}
-			visibility: hidden;
-		}
-		#control-handle:active {
-			visibility: visible;
-			background-color: rgba(0, 255, 0, 0.25);
-		}
-	</style>
-</div>
-`
-}
-
+// function htmlControlKnob () {
+// 	return `
+// <div
+// 	id="control-knob"
+// 	tabindex="-1"${'' /* focusable => (addEventListener) event.target */}
+// 	style="
+// 		position: absolute;
+// 		z-index: 2147483647;
+// 		left: 50%;
+// 		top: 50%;
+// 		transform: translate(-50%, -50%);
+// 		width: 20px;
+// 		height: 20px;
+// 		border-radius: 50%;
+// 		border: solid 2px rgba(0, 255, 0, 0.25)
+// 	"
+// >
+// 	<style>
+// 		#control-knob {
+// 			background-color: rgba(255, 0, 0, 0.25);
+// 		}
+// 		#control-knob:focus {${'' /* focus, active 순서 중요 */}
+// 			visibility: hidden;
+// 		}
+// 		#control-knob:active {
+// 			visibility: visible;
+// 			background-color: rgba(0, 255, 0, 0.25);
+// 		}
+// 	</style>
+// </div>
+// `
+// }
