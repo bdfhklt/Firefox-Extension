@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         google.com search
 // @icon         https://www.google.com/favicon.ico
-// @version      1.0.6.20220826.1
+// @version      1.0.6.20230327.0
 // @downloadURL  http://localhost:5000/user-script?file-name=google.com-search
 // @match        https://www.google.com/search?*
 // @grant        unsafeWindow
@@ -29,7 +29,7 @@
 })()
 
 
-// 요소 찾기, await 사용 가능, v20220413
+// 요소 찾기, await 사용 가능, v20220921
 function findElementUsingInterval (selector, timeout = 500, timeoutCount = 20) {
 	let count = 0
 	return new Promise((resolve, reject) => {
@@ -46,6 +46,7 @@ function findElementUsingInterval (selector, timeout = 500, timeoutCount = 20) {
 				}
 				if (count >= timeoutCount) {
 					clearInterval(interval)
+					console.log(`not found --> ${selector}`)
 					resolve(null)
 				}
 			}, timeout)

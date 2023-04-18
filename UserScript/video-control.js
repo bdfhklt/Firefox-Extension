@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         video control
-// @version      1.1.5.20221202.9
+// @version      1.1.8.20230414.7
 // @downloadURL  http://localhost:5000/user-script?file-name=video-control
 // @include      *
 // @grant        none
@@ -16,26 +16,55 @@ const VIDEO_PROGRESS = 'video-progress'
 
 // v20221119
 // element.offsetXXXX --> 정수로 반올림된 값
-function getOffset (element, valueType) {
-	let result
+// 보다 정밀한 값을 return
+// function getOffset (element, valueType) {
+// 	let result
 
-	switch (valueType) {
+// 	switch (valueType) {
+// 	case 'left':
+// 	case 'right':
+// 	case 'top':
+// 	case 'bottom':
+// 		break
+// 	default:
+// 		return 0
+// 	}
+
+// 	if (element.offsetParent === document.body) {
+// 		result = element.getBoundingClientRect()[valueType] - document.documentElement.getBoundingClientRect()[valueType]
+// 	} else {
+// 		result = element.getBoundingClientRect()[valueType] - element.offsetParent.getBoundingClientRect()[valueType]
+// 	}
+
+// 	return result
+// }
+function getOffsetParent (element, propertyName) {
+	if (element.offsetParent === null) return null
+	switch (propertyName) {
 	case 'left':
 	case 'right':
 	case 'top':
 	case 'bottom':
 		break
 	default:
-		return 0
+		return null
 	}
 
-	if (element.offsetParent === document.body) {
-		result = element.getBoundingClientRect()[valueType] - document.documentElement.getBoundingClientRect()[valueType]
-	} else {
-		result = element.getBoundingClientRect()[valueType] - element.offsetParent.getBoundingClientRect()[valueType]
+	return element.getBoundingClientRect()[propertyName] - element.offsetParent.getBoundingClientRect()[propertyName]
+}
+function getOffsetDocumentBody (element, propertyName) {
+	if (element.offsetParent === null) return null
+	switch (propertyName) {
+	case 'left':
+	case 'right':
+	case 'top':
+	case 'bottom':
+		break
+	default:
+		return null
 	}
 
-	return Math.abs(result)
+	return element.getBoundingClientRect()[propertyName] - document.documentElement.getBoundingClientRect()[propertyName]
 }
 
 
@@ -43,6 +72,9 @@ class VideoObj {
 	constructor (videoElement) {
 		this.videoElement = videoElement
 		this.videoOverlay = null
+
+		this.addVideoControl()
+		this.addVideoOverlay()
 	}
 
 	addVideoControl () {
@@ -261,8 +293,11 @@ class VideoObj {
 
 		videoOverlay.append(videoProgress)
 
-		const overlayReposition = () => {
+		// 오버레이 재배치
+		videoOverlay.overlayReposition = () => {
 			if (videoElement.nextSibling !== videoOverlay) videoElement.after(videoOverlay)
+			const getOffset = videoOverlay.offsetParent === videoElement.offsetParent ? getOffsetParent : getOffsetDocumentBody
+			if (videoElement.offsetParent === null) return
 
 			const temp1 = videoElement.getBoundingClientRect()
 			if (videoOverlay.style.width	!== Number(temp1.width.toPrecision(6)) + 'px' ||
@@ -273,6 +308,10 @@ class VideoObj {
 				overlayRepositionProcess()
 			}
 		}
+		const intervalId = setInterval(() => {
+			if (videoElement.offsetParent !== null) videoOverlay.overlayReposition()
+			else clearInterval(intervalId)
+		}, 5000)
 
 		const overlayRepositionProcess = () => {
 			videoOverlay.style.display = 'none'
@@ -282,6 +321,8 @@ class VideoObj {
 				videoOverlay.style.removeProperty('display')
 
 				if (videoElement.nextSibling !== videoOverlay) videoElement.after(videoOverlay)
+				const getOffset = videoOverlay.offsetParent === videoElement.offsetParent ? getOffsetParent : getOffsetDocumentBody
+				if (videoElement.offsetParent === null) return
 
 				const temp2 = videoElement.getBoundingClientRect()
 				videoOverlay.style.width =	temp2.width.toPrecision(6) + 'px'
@@ -298,7 +339,7 @@ class VideoObj {
 			// console.log(event)
 			event.preventDefault()
 
-			overlayReposition()
+			videoOverlay.overlayReposition()
 
 			// videoElement.focus({ focusVisible: true })
 		})
@@ -321,19 +362,33 @@ class VideoObj {
 			videoElement.currentTime = videoElement.duration * temp4
 		})
 
+		// 비디오 길이
 		if (videoElement.duration) {
 			videoProgress.max = videoElement.duration
-			overlayReposition()
+			videoOverlay.overlayReposition()
 		} else {
 			videoElement.addEventListener('durationchange', (event) => {
 				// console.log(event)
 				videoProgress.max = videoElement.duration
-				overlayReposition()
+				videoOverlay.overlayReposition()
 			})
 		}
+		let timeoutSwitch = false
 		videoElement.addEventListener('timeupdate', (event) => {
 			// console.log(event)
 			videoProgress.value = videoElement.currentTime
+
+			// 비디오 길이 확인
+			if (timeoutSwitch === false) {
+				// console.log('timeout process in timeupdate')
+				timeoutSwitch = true
+				setTimeout(() => {
+					timeoutSwitch = false
+					if (videoProgress.max !== videoElement.duration) {
+						videoProgress.max = videoElement.duration
+					}
+				}, 5000)
+			}
 		})
 	}
 }
@@ -427,8 +482,6 @@ function addVideoObj (videoElement) {
 		// }
 	} else {
 		videoElement.userscriptVideoObj = new VideoObj(videoElement)
-		videoElement.userscriptVideoObj.addVideoControl()
-		videoElement.userscriptVideoObj.addVideoOverlay()
 	}
 }
 
