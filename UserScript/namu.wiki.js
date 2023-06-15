@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         namu.wiki
 // @icon         https://namu.wiki/favicon.svg
-// @version      1.0.10.20221226.0
+// @version      1.0.11.20230507.0
 // @downloadURL  http://localhost:5000/user-script?file-name=namu.wiki
 // @match        https://namu.wiki/*
 // @grant        GM_setValue
@@ -69,12 +69,12 @@ document.addEventListener('DOMContentLoaded', event => {
 // `
 // 	)
 	document.head.appendChild(document.createElement('style')).innerHTML = (`
-.${class1Name} {
+.${CSS.escape(class1Name)} {
 	filter: blur(0.25rem) invert(0.45);
 	clip-path: inset(0px);
 	user-select: none;
 }
-.${class1Name} > * {
+.${CSS.escape(class1Name)} > * {
 	pointer-events: none;
 }
 `

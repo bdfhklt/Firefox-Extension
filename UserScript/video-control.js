@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         video control
-// @version      1.1.8.20230414.7
+// @version      1.1.9.20230529.6
 // @downloadURL  http://localhost:5000/user-script?file-name=video-control
 // @include      *
 // @grant        none
@@ -423,6 +423,16 @@ document.head.appendChild(document.createElement('style')).innerHTML = (`
 	position: absolute;
 	display: block;
 	background-color: #fffb;
+	transition-property: height;
+	transition-duration: 0.8s;
+	transition-delay: 0.4s;
+}
+#${USERSCRIPT_ID}.${VIDEO_PROGRESS}:hover {
+	width: calc(100% - 8px);
+	height: 15px;
+	transition-property: height;
+	transition-duration: 0.4s;
+	transition-delay: 0s;
 }
 #${USERSCRIPT_ID}.${VIDEO_PROGRESS}::-moz-progress-bar {
 	background-color: #0007;
