@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         youtube.com watch
 // @icon         https://www.youtube.com/s/desktop/592786db/img/favicon_144x144.png
-// @version      1.0.7.20230309.25
+// @version      1.0.8.20230703.6
 // @downloadURL  http://localhost:5000/user-script?file-name=youtube.com-watch
 // @match        https://www.youtube.com/*
 // @grant        unsafeWindow
@@ -83,13 +83,13 @@ const Player = {
 	height: 20px;
 	border-radius: 50%;
 	border: solid 2px rgba(0, 255, 0, 0.25);
+	background-clip: padding-box;
 	background-color: rgba(255, 0, 0, 0.25);
 }
 #${USERSCRIPT_ID}.${CONTROL_KNOB_CONTAINER} > div:focus {${'' /* focus, active 순서 중요, visiable: hidden --> focus를 잃음 */}
-	opacity: 0.25;
+	background-color: rgba(0, 255, 0, 0.05);
 }
 #${USERSCRIPT_ID}.${CONTROL_KNOB_CONTAINER} > div:active {
-	opacity: 1;
 	background-color: rgba(0, 255, 0, 0.25);
 }
 `

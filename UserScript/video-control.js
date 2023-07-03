@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         video control
-// @version      1.1.9.20230529.6
+// @version      1.1.11.20230702.13
 // @downloadURL  http://localhost:5000/user-script?file-name=video-control
 // @include      *
 // @grant        none
@@ -283,15 +283,28 @@ class VideoObj {
 	addVideoOverlay () {
 		const videoElement = this.videoElement
 		const videoOverlay = (this.videoOverlay = document.createElement('div'))
+		const videoProgressContainer = document.createElement('div')
 		const videoProgress = document.createElement('progress')
+		const videoProgressBuffering = document.createElement('canvas')
 
-		videoOverlay.id = USERSCRIPT_ID
-		videoProgress.id = USERSCRIPT_ID
+		for (const element of [
+			videoOverlay,
+			videoProgressContainer,
+			videoProgress,
+			videoProgressBuffering
+		]) {
+			element.id = USERSCRIPT_ID
+		}
 
 		videoOverlay.classList.add(VIDEO_OVERLAY)
+		videoProgressContainer.classList.add(`${VIDEO_PROGRESS}-container`)
 		videoProgress.classList.add(VIDEO_PROGRESS)
+		videoProgressBuffering.classList.add(`${VIDEO_PROGRESS}-buffering`)
 
-		videoOverlay.append(videoProgress)
+		videoOverlay.append(videoProgressContainer)
+		videoProgressContainer.append(videoProgress)
+		videoProgressContainer.append(videoProgressBuffering)
+
 
 		// 오버레이 재배치
 		videoOverlay.overlayReposition = () => {
@@ -350,6 +363,8 @@ class VideoObj {
 		// 	event.preventDefault()
 		// })
 
+
+		// progress
 		videoProgress.addEventListener('click', (event) => {
 			// console.log(event)
 
@@ -362,6 +377,7 @@ class VideoObj {
 			videoElement.currentTime = videoElement.duration * temp4
 		})
 
+
 		// 비디오 길이
 		if (videoElement.duration) {
 			videoProgress.max = videoElement.duration
@@ -373,22 +389,65 @@ class VideoObj {
 				videoOverlay.overlayReposition()
 			})
 		}
-		let timeoutSwitch = false
+		let timeoutSwitch1 = false
 		videoElement.addEventListener('timeupdate', (event) => {
 			// console.log(event)
 			videoProgress.value = videoElement.currentTime
 
 			// 비디오 길이 확인
-			if (timeoutSwitch === false) {
-				// console.log('timeout process in timeupdate')
-				timeoutSwitch = true
+			if (timeoutSwitch1 === false) {
+				// console.log('timeout process in timeupdate event')
+				timeoutSwitch1 = true
 				setTimeout(() => {
-					timeoutSwitch = false
+					timeoutSwitch1 = false
 					if (videoProgress.max !== videoElement.duration) {
 						videoProgress.max = videoElement.duration
 					}
 				}, 5000)
 			}
+		})
+
+
+		// 비디오 버퍼링
+		videoProgressBuffering.width = parseInt(getComputedStyle(videoProgressBuffering).width)
+		videoProgressBuffering.height = 1
+
+		let timeoutSwitch2 = false
+		videoProgressBuffering.reflashBuffering = () => {
+			const canvas = videoProgressBuffering
+			const canvasContext = canvas.getContext('2d')
+
+			if (timeoutSwitch2 === false) {
+				timeoutSwitch2 = true
+				setTimeout(() => {
+					// console.log('timeout process in progress event')
+					timeoutSwitch2 = false
+					const canvasWidth = parseInt(getComputedStyle(canvas).width)
+					if (canvas.width !== canvasWidth) canvas.width = canvasWidth
+				}, 5000)
+			}
+
+			canvasContext.clearRect(0, 0, canvas.width, canvas.height)
+			canvasContext.fillStyle = '#0002'
+
+			const inc = canvas.width / videoElement.duration
+			for (let i = 0; i < videoElement.buffered.length; i++) {
+				const startX = videoElement.buffered.start(i) * inc
+				const endX = videoElement.buffered.end(i) * inc
+				const fillWidth = endX - startX
+
+				canvasContext.fillRect(startX, 0, fillWidth, canvas.height)
+			}
+		}
+		let timeout1 = null
+		videoElement.addEventListener('progress', (event) => {
+			// console.log(event)
+			videoProgressBuffering.reflashBuffering()
+
+			if (timeout1) clearTimeout(timeout1)
+			timeout1 = setTimeout(() => {
+				videoProgressBuffering.reflashBuffering()
+			}, 2000)
 		})
 	}
 }
@@ -413,6 +472,17 @@ document.head.appendChild(document.createElement('style')).innerHTML = (`
 	all: revert;
 	pointer-events: initial;
 }
+#${USERSCRIPT_ID}.${VIDEO_PROGRESS}-container {
+	width: 100%;
+	height: 26px;
+	bottom: 0px;
+	position: absolute;
+	display: block;
+}
+#${USERSCRIPT_ID}.${VIDEO_PROGRESS}-container:hover > #${USERSCRIPT_ID}.${VIDEO_PROGRESS},
+#${USERSCRIPT_ID}.${VIDEO_PROGRESS}-container:hover > #${USERSCRIPT_ID}.${VIDEO_PROGRESS}-buffering {
+	height: 15px;
+}
 #${USERSCRIPT_ID}.${VIDEO_PROGRESS} {
 	width: calc(100% - 8px);
 	height: 2px;
@@ -424,18 +494,23 @@ document.head.appendChild(document.createElement('style')).innerHTML = (`
 	display: block;
 	background-color: #fffb;
 	transition-property: height;
-	transition-duration: 0.8s;
-	transition-delay: 0.4s;
-}
-#${USERSCRIPT_ID}.${VIDEO_PROGRESS}:hover {
-	width: calc(100% - 8px);
-	height: 15px;
-	transition-property: height;
 	transition-duration: 0.4s;
-	transition-delay: 0s;
 }
 #${USERSCRIPT_ID}.${VIDEO_PROGRESS}::-moz-progress-bar {
 	background-color: #0007;
+}
+#${USERSCRIPT_ID}.${VIDEO_PROGRESS}-buffering {
+	width: calc(100% - 8px);
+	height: 2px;
+	padding: 1px;
+	border: none;
+	margin: 3px;
+	bottom: 0px;
+	position: absolute;
+	display: block;
+	transition-property: height;
+	transition-duration: 0.4s;
+	pointer-events: none;
 }
 `
 )
