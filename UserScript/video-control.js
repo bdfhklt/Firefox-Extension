@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         video control
-// @version      1.1.11.20230702.13
+// @version      1.1.12.20240112.3
 // @downloadURL  http://localhost:5000/user-script?file-name=video-control
 // @include      *
 // @grant        none
@@ -282,7 +282,7 @@ class VideoObj {
 
 	addVideoOverlay () {
 		const videoElement = this.videoElement
-		const videoOverlay = (this.videoOverlay = document.createElement('div'))
+		const videoOverlay = (this.videoOverlay = document.createElement(`${USERSCRIPT_ID}--div`))
 		const videoProgressContainer = document.createElement('div')
 		const videoProgress = document.createElement('progress')
 		const videoProgressBuffering = document.createElement('canvas')

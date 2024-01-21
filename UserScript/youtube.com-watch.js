@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         youtube.com watch
 // @icon         https://www.youtube.com/s/desktop/592786db/img/favicon_144x144.png
-// @version      1.0.8.20230703.6
+// @version      1.0.10.20231026.15
 // @downloadURL  http://localhost:5000/user-script?file-name=youtube.com-watch
 // @match        https://www.youtube.com/*
 // @grant        unsafeWindow
@@ -87,7 +87,7 @@ const Player = {
 	background-color: rgba(255, 0, 0, 0.25);
 }
 #${USERSCRIPT_ID}.${CONTROL_KNOB_CONTAINER} > div:focus {${'' /* focus, active 순서 중요, visiable: hidden --> focus를 잃음 */}
-	background-color: rgba(0, 255, 0, 0.05);
+	background-color: rgba(0, 255, 255, 0.05);
 }
 #${USERSCRIPT_ID}.${CONTROL_KNOB_CONTAINER} > div:active {
 	background-color: rgba(0, 255, 0, 0.25);
@@ -291,111 +291,135 @@ async function playerControl () {
 	// })
 
 	// keyboard shortcuts: https://support.google.com/youtube/answer/7631406?hl=ko
-	Player.controlKnob.addEventListener('keydown', event => {
-	// document.body.addEventListener('keydown', event => {
-		// console.log(event)
-
+	function keyEventProcess (event) {
 		if (Player.controlCheckbox && !Player.controlCheckbox.checked) return
 
-		let keydown = true
+		let keyEvent = true
 		let messageText = null
 
-		switch (event.code) {
-		// 재생, 정지
-		case 'Space':
-			switch (player.getPlayerState()) {
-			case Player.State.PLAYING: // 재생 중
-				player.pauseVideo()
-				messageText = '⏸'
+		if (event.type === 'keydown') {
+			switch (event.code) {
+			// 재생, 정지; ! 길게 누르면 2배 재생 기능 추가되면서 keyup event로 변경 됨 !
+			case 'Space':
+				if (event.repeat) break
+
+				switch (player.getPlayerState()) {
+				case Player.State.PLAYING: // 재생 중
+					player.pauseVideo()
+					messageText = '⏸'
+					break
+				case Player.State.PAUSED: // 일시중지
+					player.playVideo()
+					messageText = '▶'
+					break
+				}
 				break
-			case Player.State.PAUSED: // 일시중지
-				player.playVideo()
-				messageText = '▶'
+
+			// 탐색
+			case 'ArrowLeft':
+				if (event.shiftKey) {
+					player.seekTo(player.getCurrentTime() - 20)
+				} else if (event.ctrlKey) {
+					player.seekTo(player.getCurrentTime() - 5)
+				} else {
+					player.seekTo(player.getCurrentTime() - 1)
+				}
+				break
+			case 'ArrowRight':
+				if (event.shiftKey) {
+					player.seekTo(player.getCurrentTime() + 20)
+				} else if (event.ctrlKey) {
+					player.seekTo(player.getCurrentTime() + 5)
+				} else {
+					player.seekTo(player.getCurrentTime() + 1)
+				}
+				break
+
+			// 프레임 단위 탐색
+			case 'Comma':
+			case 'Period':
+				if (player.getPlayerState() === Player.State.PLAYING) {
+					player.pauseVideo()
+				} else {
+					keyEvent = false
+				}
+				break
+
+			// 볼륨
+			case 'ArrowUp':
+				player.setVolume(player.getVolume() + 10)
+				messageText = `${player.getVolume()}%`
+				break
+			case 'ArrowDown':
+				player.setVolume(player.getVolume() - 10)
+				messageText = `${player.getVolume()}%`
+				break
+
+			// 음소거
+			// case 'KeyM':
+			// 	if (player.isMuted()) {
+			// 		player.unMute()
+			// 	} else {
+			// 		player.mute()
+			// 	}
+			// 	break
+
+			// 재생 속도
+			case 'NumpadAdd':
+				if (player.getPlaybackRate() < 2) {
+					const playbackRate = player.getPlaybackRate() === 0.25 ? 0.3 : player.getPlaybackRate() + 0.1
+					player.setPlaybackRate(Math.round(playbackRate * 100) / 100)
+				}
+				// console.log(player.getPlaybackRate())
+				messageText = `x${player.getPlaybackRate().toFixed(2)}`
+				break
+			case 'NumpadSubtract':
+				if (player.getPlaybackRate() > 0.25) {
+					const playbackRate = player.getPlaybackRate() === 0.25 ? 0.3 : player.getPlaybackRate() - 0.1
+					player.setPlaybackRate(Math.round(playbackRate * 100) / 100)
+				}
+				// console.log(player.getPlaybackRate())
+				messageText = `x${player.getPlaybackRate().toFixed(2)}`
+				break
+			case 'NumpadMultiply':
+				player.setPlaybackRate(1.0)
+				// console.log(player.getPlaybackRate())
+				messageText = `x${player.getPlaybackRate().toFixed(2)}`
+				break
+
+			default:
+				keyEvent = false
 				break
 			}
-			break
-
-		// 탐색
-		case 'ArrowLeft':
-			if (event.shiftKey) {
-				player.seekTo(player.getCurrentTime() - 20)
-			} else if (event.ctrlKey) {
-				player.seekTo(player.getCurrentTime() - 5)
-			} else {
-				player.seekTo(player.getCurrentTime() - 1)
-			}
-			break
-		case 'ArrowRight':
-			if (event.shiftKey) {
-				player.seekTo(player.getCurrentTime() + 20)
-			} else if (event.ctrlKey) {
-				player.seekTo(player.getCurrentTime() + 5)
-			} else {
-				player.seekTo(player.getCurrentTime() + 1)
-			}
-			break
-
-		// 프레임 단위 탐색
-		case 'Comma':
-		case 'Period':
-			if (player.getPlayerState() === Player.State.PLAYING) {
-				player.pauseVideo()
-			} else {
-				keydown = false
-			}
-			break
-
-		// 볼륨
-		case 'ArrowUp':
-			player.setVolume(player.getVolume() + 10)
-			messageText = `${player.getVolume()}%`
-			break
-		case 'ArrowDown':
-			player.setVolume(player.getVolume() - 10)
-			messageText = `${player.getVolume()}%`
-			break
-
-		// 음소거
-		// case 'KeyM':
-		// 	if (player.isMuted()) {
-		// 		player.unMute()
-		// 	} else {
-		// 		player.mute()
-		// 	}
-		// 	break
-
-		// 재생 속도
-		case 'NumpadAdd':
-			if (player.getPlaybackRate() < 2) {
-				const playbackRate = player.getPlaybackRate() === 0.25 ? 0.3 : player.getPlaybackRate() + 0.1
-				player.setPlaybackRate(Math.round(playbackRate * 100) / 100)
-			}
-			// console.log(player.getPlaybackRate())
-			messageText = `x${player.getPlaybackRate().toFixed(2)}`
-			break
-		case 'NumpadSubtract':
-			if (player.getPlaybackRate() > 0.25) {
-				const playbackRate = player.getPlaybackRate() === 0.25 ? 0.3 : player.getPlaybackRate() - 0.1
-				player.setPlaybackRate(Math.round(playbackRate * 100) / 100)
-			}
-			// console.log(player.getPlaybackRate())
-			messageText = `x${player.getPlaybackRate().toFixed(2)}`
-			break
-		case 'NumpadMultiply':
-			player.setPlaybackRate(1.0)
-			// console.log(player.getPlaybackRate())
-			messageText = `x${player.getPlaybackRate().toFixed(2)}`
-			break
-
-		default:
-			keydown = false
-			break
 		}
-		if (keydown) {
-			// event.stopImmediatePropagation()
+
+		if (event.type === 'keyup') {
+			switch (event.code) {
+			// 재생, 정지; ! 길게 누르면 2배 재생 기능 추가되면서 keyup event로 변경 됨 !
+			case 'Space':
+				break
+
+			default:
+				keyEvent = false
+				break
+			}
+		}
+
+		if (keyEvent) {
+			event.stopImmediatePropagation()
 			event.preventDefault()
 		}
+
 		if (messageText) top.postMessage({ id: 'gui-overlay-message', message: messageText }, '*')
+	}
+
+	Player.controlKnob.addEventListener('keydown', event => {
+		// console.log(event)
+		keyEventProcess(event)
+	})
+	Player.controlKnob.addEventListener('keyup', event => {
+		// console.log(event)
+		keyEventProcess(event)
 	})
 }
 

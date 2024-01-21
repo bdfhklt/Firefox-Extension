@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         namu.wiki
 // @icon         https://namu.wiki/favicon.svg
-// @version      1.0.11.20230507.0
+// @version      1.0.13.20240112.1
 // @downloadURL  http://localhost:5000/user-script?file-name=namu.wiki
 // @match        https://namu.wiki/*
 // @grant        GM_setValue
@@ -13,7 +13,9 @@
 // eslint-disable-next-line no-unused-vars
 /* global GM_setValue, GM_getValue */
 
-const GM_VALUE_CLASS1_NAME = 'class1Name'
+// * target *
+// const GM_VALUE_CLASS1_NAME = 'class1Name'
+const GM_VALUE_DATASET1_KEY = 'dataset1Name'
 
 
 // 로컬스토리지 설정, 사이드바 비활성, 고정폭 1000px
@@ -27,14 +29,18 @@ document.addEventListener('DOMContentLoaded', event => {
 	// console.log(event)
 
 	if (location.pathname.startsWith('/w/')) {
-		// class1 element 찾기
-		if (!document.querySelector(`.${GM_getValue(GM_VALUE_CLASS1_NAME, 'xxxx')}`)) {
-			// 없으면 찾아서 class1Name 업데이트
+		// target 찾기
+		// if (!document.querySelector(`.${GM_getValue(GM_VALUE_CLASS1_NAME, 'xxxx')}`)) {
+		if (!document.querySelector(`.${GM_getValue(GM_VALUE_DATASET1_KEY, 'xxxx')}`)) {
+			// 없으면 찾아서 target 업데이트
+			console.log('class1 not found')
+
 			for (const element of document.querySelectorAll(`[href="${location.pathname}"]`)) {
 				if (element._prevClass) {
 					const elementDataset1 = Object.keys(element.dataset)[0].replace(/[A-Z]/g, m => '-' + m.toLowerCase())
 					if (elementDataset1) {
-						GM_setValue(GM_VALUE_CLASS1_NAME, document.querySelector(`[data-${elementDataset1}]`).classList[0])
+						// GM_setValue(GM_VALUE_CLASS1_NAME, document.querySelector(`[data-${elementDataset1}]`).classList[0])
+						GM_setValue(GM_VALUE_DATASET1_KEY, elementDataset1)
 						break
 					}
 				}
@@ -52,7 +58,8 @@ document.addEventListener('DOMContentLoaded', event => {
 // 	pointer-events: none;
 // }`
 	// CSS 설정
-	const class1Name = GM_getValue(GM_VALUE_CLASS1_NAME, 'xxxx')
+	// const class1Name = GM_getValue(GM_VALUE_CLASS1_NAME, 'xxxx')
+	const dataset1Key = GM_getValue(GM_VALUE_DATASET1_KEY, 'xxxx')
 // 	document.head.appendChild(document.createElement('style')).innerHTML = (`
 // .${class1Name} {
 // 	position: relative;
@@ -68,13 +75,24 @@ document.addEventListener('DOMContentLoaded', event => {
 // }
 // `
 // 	)
+// 	document.head.appendChild(document.createElement('style')).innerHTML = (`
+// .${CSS.escape(class1Name)} {
+// 	filter: blur(0.25rem) invert(0.45);
+// 	clip-path: inset(0px);
+// 	user-select: none;
+// }
+// .${CSS.escape(class1Name)} > * {
+// 	pointer-events: none;
+// }
+// `
+// 	)
 	document.head.appendChild(document.createElement('style')).innerHTML = (`
-.${CSS.escape(class1Name)} {
+table[data-${dataset1Key}] {
 	filter: blur(0.25rem) invert(0.45);
 	clip-path: inset(0px);
 	user-select: none;
 }
-.${CSS.escape(class1Name)} > * {
+table[data-${dataset1Key}] > * {
 	pointer-events: none;
 }
 `
