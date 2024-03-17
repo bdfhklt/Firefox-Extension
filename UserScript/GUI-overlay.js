@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name         GUI overlay
-// @version      1.0.4.20221202.6
+// @name         public / GUI overlay
+// @version      1.0.4.20221202.7
 // @downloadURL  http://localhost:5000/user-script?file-name=GUI-overlay
 // @include      *
 // @grant        none

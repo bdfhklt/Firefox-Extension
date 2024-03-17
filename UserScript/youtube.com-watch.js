@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         youtube.com watch
+// @name         public / youtube.com watch
 // @icon         https://www.youtube.com/s/desktop/592786db/img/favicon_144x144.png
-// @version      1.0.10.20231026.15
+// @version      1.0.11.20240315.1
 // @downloadURL  http://localhost:5000/user-script?file-name=youtube.com-watch
 // @match        https://www.youtube.com/*
 // @grant        unsafeWindow
@@ -144,6 +144,7 @@ if (pathnameMatch) {
 // } main
 
 
+// 사용법: nameof(() => vailableName)
 function nameof (object) {
 	return object.toString().split(' ').pop()
 }
@@ -211,6 +212,13 @@ async function createAutoCloseCheckbox () {
 #${USERSCRIPT_ID}.${AUTO_CLOSE_CHECKBOX_CONTAINER} > div {
 	position: absolute;
 	right: 0;
+	background-color: white;
+	transition-property: opacity;
+	transition-duration: 0.4s;
+	opacity: 0;
+}
+#${USERSCRIPT_ID}.${AUTO_CLOSE_CHECKBOX_CONTAINER} > div:hover {
+	opacity: 1;
 }
 #${USERSCRIPT_ID}.${AUTO_CLOSE_CHECKBOX_CONTAINER} label {
 	font-size: medium;

@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         alldic.daum.net
+// @name         public / alldic.daum.net
 // @icon         https://alldic.daum.net/favicon.ico
-// @version      1.0.1.20220630.0
+// @version      1.0.1.20220630.1
 // @downloadURL  http://localhost:5000/user-script?file-name=alldic.daum.net
 // @match        https://alldic.daum.net/*
 // @grant        none

@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         namu.wiki
+// @name         public / namu.wiki
 // @icon         https://namu.wiki/favicon.svg
-// @version      1.0.13.20240112.1
+// @version      1.0.13.20240112.2
 // @downloadURL  http://localhost:5000/user-script?file-name=namu.wiki
 // @match        https://namu.wiki/*
 // @grant        GM_setValue

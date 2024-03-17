@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         steamcommunity.com
+// @name         public / steamcommunity.com
 // @icon         https://steamcommunity.com/favicon.ico
-// @version      1.0.0.20221031.0
+// @version      1.0.0.20221031.1
 // @downloadURL  http://localhost:5000/user-script?file-name=steamcommunity.com
 // @match        https://steamcommunity.com/*
 // @grant        none
