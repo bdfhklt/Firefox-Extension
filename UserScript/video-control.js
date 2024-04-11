@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         public / video control
-// @version      1.1.12.20240112.4
+// @version      1.1.14.20240403.1
 // @downloadURL  http://localhost:5000/user-script?file-name=video-control
 // @include      *
 // @grant        none
@@ -14,58 +14,61 @@ const VIDEO_OVERLAY = 'video-overlay'
 const VIDEO_PROGRESS = 'video-progress'
 
 
-// v20221119
+// v20240403
 // element.offsetXXXX --> 정수로 반올림된 값
 // 보다 정밀한 값을 return
-// function getOffset (element, valueType) {
-// 	let result
+function getOffset (element, propertyName) {
+	let result
 
-// 	switch (valueType) {
+	if (element.offsetParent === null) return null
+	switch (propertyName) {
+	case 'left':
+	case 'right':
+	case 'top':
+	case 'bottom':
+		break
+	default:
+		return null
+	}
+
+	result =
+		element.getBoundingClientRect()[propertyName] -
+		element.offsetParent.getBoundingClientRect()[propertyName]
+
+	if (element.offsetParent === document.body) {
+		result += parseFloat(getComputedStyle(element.offsetParent)[`margin-${propertyName}`])
+	}
+
+	return result
+}
+// function getOffsetParent (element, propertyName) {
+// 	if (element.offsetParent === null) return null
+// 	switch (propertyName) {
 // 	case 'left':
 // 	case 'right':
 // 	case 'top':
 // 	case 'bottom':
 // 		break
 // 	default:
-// 		return 0
+// 		return null
 // 	}
 
-// 	if (element.offsetParent === document.body) {
-// 		result = element.getBoundingClientRect()[valueType] - document.documentElement.getBoundingClientRect()[valueType]
-// 	} else {
-// 		result = element.getBoundingClientRect()[valueType] - element.offsetParent.getBoundingClientRect()[valueType]
-// 	}
-
-// 	return result
+// 	return element.getBoundingClientRect()[propertyName] - element.offsetParent.getBoundingClientRect()[propertyName]
 // }
-function getOffsetParent (element, propertyName) {
-	if (element.offsetParent === null) return null
-	switch (propertyName) {
-	case 'left':
-	case 'right':
-	case 'top':
-	case 'bottom':
-		break
-	default:
-		return null
-	}
+// function getOffsetDocumentBody (element, propertyName) {
+// 	if (element.offsetParent === null) return null
+// 	switch (propertyName) {
+// 	case 'left':
+// 	case 'right':
+// 	case 'top':
+// 	case 'bottom':
+// 		break
+// 	default:
+// 		return null
+// 	}
 
-	return element.getBoundingClientRect()[propertyName] - element.offsetParent.getBoundingClientRect()[propertyName]
-}
-function getOffsetDocumentBody (element, propertyName) {
-	if (element.offsetParent === null) return null
-	switch (propertyName) {
-	case 'left':
-	case 'right':
-	case 'top':
-	case 'bottom':
-		break
-	default:
-		return null
-	}
-
-	return element.getBoundingClientRect()[propertyName] - document.documentElement.getBoundingClientRect()[propertyName]
-}
+// 	return element.getBoundingClientRect()[propertyName] - document.documentElement.getBoundingClientRect()[propertyName]
+// }
 
 
 class VideoObj {
@@ -309,14 +312,21 @@ class VideoObj {
 		// 오버레이 재배치
 		videoOverlay.overlayReposition = () => {
 			if (videoElement.nextSibling !== videoOverlay) videoElement.after(videoOverlay)
-			const getOffset = videoOverlay.offsetParent === videoElement.offsetParent ? getOffsetParent : getOffsetDocumentBody
+			// const getOffset = videoOverlay.offsetParent === videoElement.offsetParent ? getOffsetParent : getOffsetDocumentBody
 			if (videoElement.offsetParent === null) return
 
 			const temp1 = videoElement.getBoundingClientRect()
-			if (videoOverlay.style.width	!== Number(temp1.width.toPrecision(6)) + 'px' ||
-				videoOverlay.style.height	!== Number(temp1.height.toPrecision(6)) + 'px' ||
-				videoOverlay.style.left		!== Number(getOffset(videoElement, 'left').toPrecision(6)) + 'px' ||
-				videoOverlay.style.top		!== Number(getOffset(videoElement, 'top').toPrecision(6)) + 'px'
+			// const temp2 = getComputedStyle(videoElement.offsetParent)
+			if (videoOverlay.style.width !== Number(temp1.width.toPrecision(6)) + 'px' ||
+				videoOverlay.style.height !== Number(temp1.height.toPrecision(6)) + 'px' ||
+				// videoOverlay.style.left		!== Number(
+				// 	(getOffset(videoElement, 'left') + parseFloat(temp2['margin-left'])).toPrecision(6)
+				// ) + 'px' ||
+				// videoOverlay.style.top		!== Number(
+				// 	(getOffset(videoElement, 'top') + parseFloat(temp2['margin-top'])).toPrecision(6)
+				// ) + 'px'
+				videoOverlay.style.left !== Number(getOffset(videoElement, 'left').toPrecision(6)) + 'px' ||
+				videoOverlay.style.top !== Number(getOffset(videoElement, 'top').toPrecision(6)) + 'px'
 			) {
 				overlayRepositionProcess()
 			}
@@ -334,17 +344,23 @@ class VideoObj {
 				videoOverlay.style.removeProperty('display')
 
 				if (videoElement.nextSibling !== videoOverlay) videoElement.after(videoOverlay)
-				const getOffset = videoOverlay.offsetParent === videoElement.offsetParent ? getOffsetParent : getOffsetDocumentBody
+				// const getOffset = videoOverlay.offsetParent === videoElement.offsetParent ? getOffsetParent : getOffsetDocumentBody
 				if (videoElement.offsetParent === null) return
 
-				const temp2 = videoElement.getBoundingClientRect()
-				videoOverlay.style.width =	temp2.width.toPrecision(6) + 'px'
-				videoOverlay.style.height = temp2.height.toPrecision(6) + 'px'
-				videoOverlay.style.left =	getOffset(videoElement, 'left').toPrecision(6) + 'px'
-				videoOverlay.style.top =	getOffset(videoElement, 'top').toPrecision(6) + 'px'
+				const temp1 = videoElement.getBoundingClientRect()
+				// const temp2 = getComputedStyle(videoElement.offsetParent)
+				videoOverlay.style.width = temp1.width.toPrecision(6) + 'px'
+				videoOverlay.style.height = temp1.height.toPrecision(6) + 'px'
+				// videoOverlay.style.left =
+				// 	(getOffset(videoElement, 'left') + parseFloat(temp2['margin-left'])).toPrecision(6) + 'px'
+				// videoOverlay.style.top =
+				// 	(getOffset(videoElement, 'top') + parseFloat(temp2['margin-top'])).toPrecision(6) + 'px'
+				videoOverlay.style.left = getOffset(videoElement, 'left').toPrecision(6) + 'px'
+				videoOverlay.style.top = getOffset(videoElement, 'top').toPrecision(6) + 'px'
 			}, 600)
 		}
 
+		// resize 관찰
 		videoOverlay.resizeObserver = new ResizeObserver(overlayRepositionProcess)
 		videoOverlay.resizeObserver.observe(videoElement)
 

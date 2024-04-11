@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         public / youtube.com watch
 // @icon         https://www.youtube.com/s/desktop/592786db/img/favicon_144x144.png
-// @version      1.0.11.20240315.1
+// @version      1.0.12.20240407.1
 // @downloadURL  http://localhost:5000/user-script?file-name=youtube.com-watch
 // @match        https://www.youtube.com/*
 // @grant        unsafeWindow
@@ -201,7 +201,7 @@ async function createAutoCloseCheckbox () {
 
 	checkboxContainer.append(checkboxBlock)
 	checkboxBlock.append(checkboxLabel, checkbox)
-	const element1 = await findElementUsingInterval('#below')
+	const element1 = await findElementUsingInterval('#below', 2000, 1800)
 	if (element1) element1.prepend(checkboxContainer)
 
 	// CSS
