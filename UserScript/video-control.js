@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         public / video control
-// @version      1.1.14.20240403.1
+// @version      1.1.15.20240420.27
 // @downloadURL  http://localhost:5000/user-script?file-name=video-control
 // @include      *
 // @grant        none
@@ -80,6 +80,207 @@ class VideoObj {
 		this.addVideoOverlay()
 	}
 
+	// 핫키, 제어
+	// keyboard shortcuts: https://support.mozilla.org/en-US/kb/html5-audio-and-video-firefox
+	handleKeyAndMouseEvent (event) {
+		console.log(event)
+		const videoElement = this.videoElement
+
+		let handledEvent = true
+		let messageText = null
+		const state = {
+			paused: videoElement.paused,
+			currentTime: videoElement.currentTime,
+			volume: videoElement.volume
+		}
+
+		let isDelayed = false
+		let work = null
+
+		function videoPlayPauseToggle () {
+			if (state.paused) {
+				if (videoElement.currentTime === videoElement.duration) {
+					videoElement.currentTime = 0
+				}
+				videoElement.play()
+				messageText = '▶'
+			} else {
+				videoElement.pause()
+				messageText = '⏸'
+			}
+		}
+
+		function videoSeek (time) {
+			videoElement.currentTime = time
+		}
+
+		function videoPauseSeek (time) {
+			if (videoElement.paused) {
+				videoSeek(time)
+			} else {
+				videoElement.pause()
+			}
+		}
+
+		switch (event.type) {
+		case 'keydown':
+			switch (event.code) {
+			// 재생, 정지
+			case 'Space':
+				isDelayed = true
+				work = () => videoPlayPauseToggle()
+				break
+
+			// 탐색
+			case 'ArrowLeft':
+				isDelayed = true
+				if (event.shiftKey) {
+					work = () => videoSeek(state.currentTime - 20)
+				} else if (event.ctrlKey) {
+					work = () => videoSeek(state.currentTime - 5)
+				} else {
+					work = () => videoSeek(state.currentTime - 1)
+				}
+				break
+			case 'ArrowRight':
+				isDelayed = true
+				if (event.shiftKey) {
+					work = () => videoSeek(state.currentTime + 20)
+				} else if (event.ctrlKey) {
+					work = () => videoSeek(state.currentTime + 5)
+				} else {
+					work = () => videoSeek(state.currentTime + 1)
+				}
+				break
+
+			// 정밀 탐색, 60fps
+			case 'Comma':
+				work = () => videoPauseSeek(state.currentTime - (1 / 60))
+				break
+			case 'Period':
+				work = () => videoPauseSeek(state.currentTime + (1 / 60))
+				break
+
+			// 특정 지점 탐색
+			case 'Home':
+				work = () => {
+					videoElement.currentTime = 0
+					messageText = '⏮'
+				}
+				break
+			case 'End':
+				work = () => {
+					if (!videoElement.paused) videoElement.pause()
+					videoElement.currentTime = videoElement.duration
+					messageText = '⏭'
+				}
+				break
+
+			// 볼륨
+			case 'ArrowUp':
+				isDelayed = true
+				work = () => {
+					if (state.volume < 1.0) {
+						videoElement.volume = Math.round((state.volume + 0.1) * 10) / 10
+					}
+					messageText = `${videoElement.volume * 100}%`
+					// console.log(videoElement.volume)
+				}
+				break
+			case 'ArrowDown':
+				isDelayed = true
+				work = () => {
+					if (state.volume > 0) {
+						videoElement.volume = Math.round((state.volume - 0.1) * 10) / 10
+					}
+					messageText = `${videoElement.volume * 100}%`
+					// console.log(videoElement.volume)
+				}
+				break
+
+			// 음소거
+			case 'KeyM':
+				work = () => {
+					videoElement.muted = !videoElement.muted
+					if (videoElement.muted) {
+						messageText = '🔇'
+					} else {
+						messageText = `${videoElement.volume * 100}%`
+					}
+				}
+				break
+
+			// 재생 속도
+			case 'NumpadAdd':
+				work = () => {
+					if (videoElement.playbackRate < 4) { // 4.0 초과: 소리가 안남
+						const playbackRate = videoElement.playbackRate === 0.25 ? 0.3 : videoElement.playbackRate + 0.1
+						videoElement.playbackRate = (Math.round(playbackRate * 100) / 100)
+					}
+					// console.log(videoElement.playbackRate)
+					messageText = `x${videoElement.playbackRate.toFixed(2)}`
+				}
+				break
+			case 'NumpadSubtract':
+				work = () => {
+					if (videoElement.playbackRate > 0.25) { // 0.25 미만: 소리가 안남
+						const playbackRate = videoElement.playbackRate === 0.3 ? 0.25 : videoElement.playbackRate - 0.1
+						videoElement.playbackRate = (Math.round(playbackRate * 100) / 100)
+					}
+					// console.log(videoElement.playbackRate)
+					messageText = `x${videoElement.playbackRate.toFixed(2)}`
+				}
+				break
+			case 'NumpadMultiply':
+				work = () => {
+					videoElement.playbackRate = videoElement.defaultPlaybackRate
+					// console.log(videoElement.playbackRate)
+					messageText = `x${videoElement.playbackRate.toFixed(2)}`
+				}
+				break
+
+			// 컨트롤
+			case 'KeyC':
+				work = () => { videoElement.controls = !videoElement.controls }
+				break
+
+			// 반복
+			case 'KeyL':
+				work = () => { videoElement.loop = !videoElement.loop }
+				break
+			}
+			break
+
+		case 'click':
+			// 재생, 정지
+			if (this.videoOverlay.contains(event.target) && event.target === this.videoOverlay) {
+				isDelayed = true
+				work = () => videoPlayPauseToggle()
+			}
+			break
+
+		default:
+			handledEvent = false
+			break
+		}
+
+		if (handledEvent) {
+			// console.log('keydown')
+			event.preventDefault()
+			event.stopImmediatePropagation()
+		}
+		const postMessage = () => { if (messageText) top.postMessage({ id: 'gui-overlay-message', message: messageText }, '*') }
+		if (isDelayed) {
+			setTimeout(() => {
+				work()
+				postMessage()
+			}, CONSTROL_DELAY)
+		} else {
+			work()
+			postMessage()
+		}
+	}
+
 	addVideoControl () {
 		console.log(this.addVideoControl.name)
 
@@ -121,197 +322,59 @@ class VideoObj {
 		videoElement.muted = false
 
 		// 핫키, 제어
-		// keyboard shortcuts: https://support.mozilla.org/en-US/kb/html5-audio-and-video-firefox
-		videoElement.addEventListener('keydown', event => {
-			// console.log(event)
-
-			let keydown = true
-			let messageText = null
-			const state = {
-				paused: videoElement.paused,
-				currentTime: videoElement.currentTime,
-				volume: videoElement.volume
-			}
-
-			let delayedProcess
-
-			switch (event.code) {
-			// 재생, 정지
-			case 'Space':
-				if (state.paused) {
-					delayedProcess = () => {
-						if (videoElement.currentTime === videoElement.duration) {
-							videoElement.currentTime = 0
-						}
-						videoElement.play()
-					}
-					messageText = '▶'
-				} else {
-					delayedProcess = () => videoElement.pause()
-					messageText = '⏸'
-				}
-				break
-
-			// 탐색
-			case 'ArrowLeft':
-				if (event.shiftKey) {
-					delayedProcess = () => { videoElement.currentTime = state.currentTime - 20 }
-				} else if (event.ctrlKey) {
-					delayedProcess = () => { videoElement.currentTime = state.currentTime - 5 }
-				} else {
-					delayedProcess = () => { videoElement.currentTime = state.currentTime - 1 }
-				}
-				break
-			case 'ArrowRight':
-				if (event.shiftKey) {
-					delayedProcess = () => { videoElement.currentTime = state.currentTime + 20 }
-				} else if (event.ctrlKey) {
-					delayedProcess = () => { videoElement.currentTime = state.currentTime + 5 }
-				} else {
-					delayedProcess = () => { videoElement.currentTime = state.currentTime + 1 }
-				}
-				break
-
-			// 정밀 탐색, 60fps
-			case 'Comma':
-				if (videoElement.paused) {
-					videoElement.currentTime -= 1 / 60
-				} else {
-					videoElement.pause()
-				}
-				break
-			case 'Period':
-				if (videoElement.paused) {
-					videoElement.currentTime += 1 / 60
-				} else {
-					videoElement.pause()
-				}
-				break
-
-			// 특정 지점 탐색
-			case 'Home':
-				videoElement.currentTime = 0
-				messageText = '⏮'
-				break
-			case 'End':
-				if (!videoElement.paused) videoElement.pause()
-				videoElement.currentTime = videoElement.duration
-				messageText = '⏭'
-				break
-
-			// 볼륨
-			case 'ArrowUp':
-				if (state.volume < 1.0) {
-					delayedProcess = () => {
-						videoElement.volume = Math.round((state.volume + 0.1) * 10) / 10
-						messageText = `${videoElement.volume * 100}%`
-					}
-				} else messageText = `${videoElement.volume * 100}%`
-				// console.log(videoElement.volume)
-				break
-			case 'ArrowDown':
-				if (state.volume > 0) {
-					delayedProcess = () => {
-						videoElement.volume = Math.round((state.volume - 0.1) * 10) / 10
-						messageText = `${videoElement.volume * 100}%`
-					}
-				} else messageText = `${videoElement.volume * 100}%`
-				// console.log(videoElement.volume)
-				break
-
-			// 음소거
-			case 'KeyM':
-				videoElement.muted = !videoElement.muted
-				if (videoElement.muted) {
-					messageText = '🔇'
-				} else {
-					messageText = `${videoElement.volume * 100}%`
-				}
-				break
-
-			// 재생 속도
-			case 'NumpadAdd':
-				if (videoElement.playbackRate < 4) { // 4.0 초과: 소리가 안남
-					const playbackRate = videoElement.playbackRate === 0.25 ? 0.3 : videoElement.playbackRate + 0.1
-					videoElement.playbackRate = (Math.round(playbackRate * 100) / 100)
-				}
-				// console.log(videoElement.playbackRate)
-				messageText = `x${videoElement.playbackRate.toFixed(2)}`
-				break
-			case 'NumpadSubtract':
-				if (videoElement.playbackRate > 0.25) { // 0.25 미만: 소리가 안남
-					const playbackRate = videoElement.playbackRate === 0.3 ? 0.25 : videoElement.playbackRate - 0.1
-					videoElement.playbackRate = (Math.round(playbackRate * 100) / 100)
-				}
-				// console.log(videoElement.playbackRate)
-				messageText = `x${videoElement.playbackRate.toFixed(2)}`
-				break
-			case 'NumpadMultiply':
-				videoElement.playbackRate = videoElement.defaultPlaybackRate
-				// console.log(videoElement.playbackRate)
-				messageText = `x${videoElement.playbackRate.toFixed(2)}`
-				break
-
-			// 컨트롤
-			case 'KeyC':
-				videoElement.controls = !videoElement.controls
-				break
-
-			// 반복
-			case 'KeyL':
-				videoElement.loop = !videoElement.loop
-				break
-
-			default:
-				keydown = false
-				break
-			}
-			if (keydown) {
-				// console.log('keydown')
-				event.preventDefault()
-				event.stopImmediatePropagation()
-			}
-			const postMessage = () => { if (messageText) top.postMessage({ id: 'gui-overlay-message', message: messageText }, '*') }
-			if (delayedProcess) {
-				setTimeout(() => {
-					delayedProcess()
-					postMessage()
-				}, CONSTROL_DELAY)
-			} else {
-				postMessage()
-			}
-		})
+		// videoElement.addEventListener('keydown', this.videoControl)
 	}
 
 	addVideoOverlay () {
+		const domParser = new DOMParser()
+
 		const videoElement = this.videoElement
-		const videoOverlay = (this.videoOverlay = document.createElement(`${USERSCRIPT_ID}--div`))
-		const videoProgressContainer = document.createElement('div')
-		const videoProgress = document.createElement('progress')
-		const videoProgressBuffering = document.createElement('canvas')
+		// const videoOverlay = (this.videoOverlay = document.createElement(`${USERSCRIPT_ID}--div`))
+		// const videoProgressContainer = document.createElement('div')
+		// const videoProgress = document.createElement('progress')
+		// const videoProgressBuffering = document.createElement('canvas')
+		const tempElement = (domParser.parseFromString(htmlVideoOverlay(), 'text/html')).documentElement
+		const videoOverlay = (this.videoOverlay = tempElement.querySelector(`#${USERSCRIPT_ID}.${VIDEO_OVERLAY}`))
+		tempElement.remove()
 
-		for (const element of [
-			videoOverlay,
-			videoProgressContainer,
-			videoProgress,
-			videoProgressBuffering
-		]) {
-			element.id = USERSCRIPT_ID
-		}
+		const videoProgressContainer = videoOverlay.querySelector(`.${VIDEO_PROGRESS}-container`)
+		const videoProgress = videoOverlay.querySelector(`.${VIDEO_PROGRESS}`)
+		const videoProgressBuffering = videoOverlay.querySelector(`.${VIDEO_PROGRESS}-buffering`)
+		// const videoProgressTime = videoOverlay.querySelector(`.${VIDEO_PROGRESS}-time`)
 
-		videoOverlay.classList.add(VIDEO_OVERLAY)
-		videoProgressContainer.classList.add(`${VIDEO_PROGRESS}-container`)
-		videoProgress.classList.add(VIDEO_PROGRESS)
-		videoProgressBuffering.classList.add(`${VIDEO_PROGRESS}-buffering`)
+		// for (const element of [
+		// 	videoOverlay,
+		// 	videoProgressContainer,
+		// 	videoProgress,
+		// 	videoProgressBuffering
+		// ]) {
+		// 	element.id = USERSCRIPT_ID
+		// }
 
-		videoOverlay.append(videoProgressContainer)
-		videoProgressContainer.append(videoProgress)
-		videoProgressContainer.append(videoProgressBuffering)
+		// videoOverlay.classList.add(VIDEO_OVERLAY)
+		// videoProgressContainer.classList.add(`${VIDEO_PROGRESS}-container`)
+		// videoProgress.classList.add(VIDEO_PROGRESS)
+		// videoProgressBuffering.classList.add(`${VIDEO_PROGRESS}-buffering`)
+
+		// videoOverlay.append(videoProgressContainer)
+		// videoProgressContainer.append(videoProgress)
+		// videoProgressContainer.append(videoProgressBuffering)
+
+
+		// 핫키, 제어
+		videoOverlay.tabIndex = -1
+		videoOverlay.addEventListener('keydown', event => this.handleKeyAndMouseEvent(event))
+		videoOverlay.addEventListener('click', event => this.handleKeyAndMouseEvent(event))
+
+		// 클릭시 비디오 포커스
+		// videoProgressContainer.addEventListener('click', () => {
+		// 	videoOverlay.focus()
+		// })
 
 
 		// 오버레이 재배치
 		videoOverlay.overlayReposition = () => {
-			if (videoElement.nextSibling !== videoOverlay) videoElement.after(videoOverlay)
+			if (videoElement.nextElementSibling !== videoOverlay) videoElement.after(videoOverlay)
 			// const getOffset = videoOverlay.offsetParent === videoElement.offsetParent ? getOffsetParent : getOffsetDocumentBody
 			if (videoElement.offsetParent === null) return
 
@@ -343,7 +406,7 @@ class VideoObj {
 			videoOverlay.timeoutId = setTimeout(() => {
 				videoOverlay.style.removeProperty('display')
 
-				if (videoElement.nextSibling !== videoOverlay) videoElement.after(videoOverlay)
+				if (videoElement.nextElementSibling !== videoOverlay) videoElement.after(videoOverlay)
 				// const getOffset = videoOverlay.offsetParent === videoElement.offsetParent ? getOffsetParent : getOffsetDocumentBody
 				if (videoElement.offsetParent === null) return
 
@@ -394,33 +457,38 @@ class VideoObj {
 		})
 
 
+		// 비디오 재생시간
+		// function videoTimeUpdate () {
+
+		// }
+
 		// 비디오 길이
 		if (videoElement.duration) {
 			videoProgress.max = videoElement.duration
 			videoOverlay.overlayReposition()
-		} else {
-			videoElement.addEventListener('durationchange', (event) => {
-				// console.log(event)
-				videoProgress.max = videoElement.duration
-				videoOverlay.overlayReposition()
-			})
 		}
-		let timeoutSwitch1 = false
+		videoElement.addEventListener('durationchange', (event) => {
+			// console.log(event)
+			videoProgress.max = videoElement.duration
+			videoOverlay.overlayReposition()
+		})
+
+		// let timeoutSwitch1 = false
 		videoElement.addEventListener('timeupdate', (event) => {
 			// console.log(event)
 			videoProgress.value = videoElement.currentTime
 
 			// 비디오 길이 확인
-			if (timeoutSwitch1 === false) {
-				// console.log('timeout process in timeupdate event')
-				timeoutSwitch1 = true
-				setTimeout(() => {
-					timeoutSwitch1 = false
-					if (videoProgress.max !== videoElement.duration) {
-						videoProgress.max = videoElement.duration
-					}
-				}, 5000)
-			}
+			// if (timeoutSwitch1 === false) {
+			// 	// console.log('timeout process in timeupdate event')
+			// 	timeoutSwitch1 = true
+			// 	setTimeout(() => {
+			// 		timeoutSwitch1 = false
+			// 		if (videoProgress.max !== videoElement.duration) {
+			// 			videoProgress.max = videoElement.duration
+			// 		}
+			// 	}, 5000)
+			// }
 		})
 
 
@@ -479,7 +547,7 @@ document.head.appendChild(document.createElement('style')).innerHTML = (`
 
 	position: absolute;
 	z-index: 2147483647;
-	pointer-events: none;
+	/* pointer-events: none; */
 }
 #${USERSCRIPT_ID}.${VIDEO_OVERLAY}:active {
 	background-color: #ff01;
@@ -488,18 +556,18 @@ document.head.appendChild(document.createElement('style')).innerHTML = (`
 	all: revert;
 	pointer-events: initial;
 }
-#${USERSCRIPT_ID}.${VIDEO_PROGRESS}-container {
+#${USERSCRIPT_ID} .${VIDEO_PROGRESS}-container {
 	width: 100%;
 	height: 26px;
 	bottom: 0px;
 	position: absolute;
 	display: block;
 }
-#${USERSCRIPT_ID}.${VIDEO_PROGRESS}-container:hover > #${USERSCRIPT_ID}.${VIDEO_PROGRESS},
-#${USERSCRIPT_ID}.${VIDEO_PROGRESS}-container:hover > #${USERSCRIPT_ID}.${VIDEO_PROGRESS}-buffering {
+#${USERSCRIPT_ID} .${VIDEO_PROGRESS}-container:hover > .${VIDEO_PROGRESS},
+#${USERSCRIPT_ID} .${VIDEO_PROGRESS}-container:hover > .${VIDEO_PROGRESS}-buffering {
 	height: 15px;
 }
-#${USERSCRIPT_ID}.${VIDEO_PROGRESS} {
+#${USERSCRIPT_ID} .${VIDEO_PROGRESS} {
 	width: calc(100% - 8px);
 	height: 2px;
 	padding: 1px;
@@ -511,11 +579,19 @@ document.head.appendChild(document.createElement('style')).innerHTML = (`
 	background-color: #fffb;
 	transition-property: height;
 	transition-duration: 0.4s;
+
+	-webkit-box-sizing: content-box;
 }
-#${USERSCRIPT_ID}.${VIDEO_PROGRESS}::-moz-progress-bar {
+#${USERSCRIPT_ID} .${VIDEO_PROGRESS}::-moz-progress-bar {
 	background-color: #0007;
 }
-#${USERSCRIPT_ID}.${VIDEO_PROGRESS}-buffering {
+#${USERSCRIPT_ID} .${VIDEO_PROGRESS}::-webkit-progress-bar {
+	background-color: transparent;
+}
+#${USERSCRIPT_ID} .${VIDEO_PROGRESS}::-webkit-progress-value {
+	background-color: #0007;
+}
+#${USERSCRIPT_ID} .${VIDEO_PROGRESS}-buffering {
 	width: calc(100% - 8px);
 	height: 2px;
 	padding: 1px;
@@ -610,3 +686,16 @@ function addVideoObj (videoElement) {
 // </div>
 // `
 // }
+
+
+function htmlVideoOverlay () {
+	return `
+<${USERSCRIPT_ID}--div id="${USERSCRIPT_ID}" class="${VIDEO_OVERLAY}" tabindex="-1">
+	<div class="${VIDEO_PROGRESS}-container">
+		<!-- <div class="${VIDEO_PROGRESS}-time">00:00:00</div> -->
+		<progress class="${VIDEO_PROGRESS}"></progress>
+		<canvas class="${VIDEO_PROGRESS}-buffering"></canvas>
+	</div>
+</${USERSCRIPT_ID}--div>
+`
+}
