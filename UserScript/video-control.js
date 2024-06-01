@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         public / video control
-// @version      1.1.15.20240420.27
+// @version      1.1.18.20240601.2
 // @downloadURL  http://localhost:5000/user-script?file-name=video-control
 // @include      *
 // @grant        none
@@ -41,34 +41,27 @@ function getOffset (element, propertyName) {
 
 	return result
 }
-// function getOffsetParent (element, propertyName) {
-// 	if (element.offsetParent === null) return null
-// 	switch (propertyName) {
-// 	case 'left':
-// 	case 'right':
-// 	case 'top':
-// 	case 'bottom':
-// 		break
-// 	default:
-// 		return null
-// 	}
 
-// 	return element.getBoundingClientRect()[propertyName] - element.offsetParent.getBoundingClientRect()[propertyName]
-// }
-// function getOffsetDocumentBody (element, propertyName) {
-// 	if (element.offsetParent === null) return null
-// 	switch (propertyName) {
-// 	case 'left':
-// 	case 'right':
-// 	case 'top':
-// 	case 'bottom':
-// 		break
-// 	default:
-// 		return null
-// 	}
 
-// 	return element.getBoundingClientRect()[propertyName] - document.documentElement.getBoundingClientRect()[propertyName]
-// }
+// v20240601
+// 상위 요소 사이의 거리
+function getDistanceBetweenOffsetParents (element1, element2, propertyName) {
+	switch (propertyName) {
+	case 'left':
+	case 'right':
+	case 'top':
+	case 'bottom':
+		break
+	default:
+		return null
+	}
+
+	if (element1.offsetParent === element2.offsetParent) {
+		return 0
+	}
+
+	return element1.offsetParent.getBoundingClientRect()[propertyName] - element2.offsetParent.getBoundingClientRect()[propertyName]
+}
 
 
 class VideoObj {
@@ -83,10 +76,10 @@ class VideoObj {
 	// 핫키, 제어
 	// keyboard shortcuts: https://support.mozilla.org/en-US/kb/html5-audio-and-video-firefox
 	handleKeyAndMouseEvent (event) {
-		console.log(event)
+		// console.log(event)
 		const videoElement = this.videoElement
 
-		let handledEvent = true
+		// let eventHandled = true
 		let messageText = null
 		const state = {
 			paused: videoElement.paused,
@@ -239,14 +232,16 @@ class VideoObj {
 				}
 				break
 
-			// 컨트롤
+			// 브라우저 내장 비디오 컨트롤
 			case 'KeyC':
 				work = () => { videoElement.controls = !videoElement.controls }
+				messageText = `controls ${!videoElement.controls ? 'on' : 'off'}`
 				break
 
 			// 반복
 			case 'KeyL':
 				work = () => { videoElement.loop = !videoElement.loop }
+				messageText = `loop ${!videoElement.loop ? 'on' : 'off'}`
 				break
 			}
 			break
@@ -259,25 +254,36 @@ class VideoObj {
 			}
 			break
 
-		default:
-			handledEvent = false
+		case 'auxclick': // 왼클릭 제외한 버튼. button=1:휠, button=2:우클릭
+			// 오버레이 잠깐 숨기기
+			if (event.button !== 2 && this.videoOverlay.contains(event.target) && event.target === this.videoOverlay) {
+				isDelayed = true
+				work = () => {
+					this.videoOverlay.style.display = 'none'
+					setTimeout(() => {
+						this.videoOverlay.style.removeProperty('display')
+					}, 2000)
+				}
+			}
 			break
 		}
 
-		if (handledEvent) {
-			// console.log('keydown')
+
+		if (work) {
+			// console.log('event handled')
 			event.preventDefault()
 			event.stopImmediatePropagation()
-		}
-		const postMessage = () => { if (messageText) top.postMessage({ id: 'gui-overlay-message', message: messageText }, '*') }
-		if (isDelayed) {
-			setTimeout(() => {
+
+			const postMessage = () => { if (messageText) top.postMessage({ id: 'gui-overlay-message', message: messageText }, '*') }
+			if (isDelayed) {
+				setTimeout(() => {
+					work()
+					postMessage()
+				}, CONSTROL_DELAY)
+			} else {
 				work()
 				postMessage()
-			}, CONSTROL_DELAY)
-		} else {
-			work()
-			postMessage()
+			}
 		}
 	}
 
@@ -365,6 +371,7 @@ class VideoObj {
 		videoOverlay.tabIndex = -1
 		videoOverlay.addEventListener('keydown', event => this.handleKeyAndMouseEvent(event))
 		videoOverlay.addEventListener('click', event => this.handleKeyAndMouseEvent(event))
+		videoOverlay.addEventListener('auxclick', event => this.handleKeyAndMouseEvent(event))
 
 		// 클릭시 비디오 포커스
 		// videoProgressContainer.addEventListener('click', () => {
@@ -388,8 +395,14 @@ class VideoObj {
 				// videoOverlay.style.top		!== Number(
 				// 	(getOffset(videoElement, 'top') + parseFloat(temp2['margin-top'])).toPrecision(6)
 				// ) + 'px'
-				videoOverlay.style.left !== Number(getOffset(videoElement, 'left').toPrecision(6)) + 'px' ||
-				videoOverlay.style.top !== Number(getOffset(videoElement, 'top').toPrecision(6)) + 'px'
+				videoOverlay.style.left !== Number((
+					getOffset(videoElement, 'left') +
+					getDistanceBetweenOffsetParents(videoElement, videoOverlay, 'left')
+				).toPrecision(6)) + 'px' ||
+				videoOverlay.style.top !== Number((
+					getOffset(videoElement, 'top') +
+					getDistanceBetweenOffsetParents(videoElement, videoOverlay, 'top')
+				).toPrecision(6)) + 'px'
 			) {
 				overlayRepositionProcess()
 			}
@@ -418,8 +431,14 @@ class VideoObj {
 				// 	(getOffset(videoElement, 'left') + parseFloat(temp2['margin-left'])).toPrecision(6) + 'px'
 				// videoOverlay.style.top =
 				// 	(getOffset(videoElement, 'top') + parseFloat(temp2['margin-top'])).toPrecision(6) + 'px'
-				videoOverlay.style.left = getOffset(videoElement, 'left').toPrecision(6) + 'px'
-				videoOverlay.style.top = getOffset(videoElement, 'top').toPrecision(6) + 'px'
+				videoOverlay.style.left = (
+					getOffset(videoElement, 'left') +
+					getDistanceBetweenOffsetParents(videoElement, videoOverlay, 'left')
+				).toPrecision(6) + 'px'
+				videoOverlay.style.top = (
+					getOffset(videoElement, 'top') +
+					getDistanceBetweenOffsetParents(videoElement, videoOverlay, 'top')
+				).toPrecision(6) + 'px'
 			}, 600)
 		}
 
