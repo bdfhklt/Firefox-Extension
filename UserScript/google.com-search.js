@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name         private / google.com search
+// @name         public / google.com search
 // @icon         https://www.google.com/favicon.ico
 // @version      1.0.9.20240228.1
 // @downloadURL  http://localhost:5000/user-script?file-name=google.com-search
 // @match        https://www.google.com/*
-// @grant        unsafeWindow
+// @grant        none
 // @noframes
 // ==/UserScript==
 
