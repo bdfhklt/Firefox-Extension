@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         public / chatgpt.com
 // @icon         https://cdn.oaistatic.com/_next/static/media/favicon-32x32.630a2b99.png
-// @version      1.0.0.20240607.4
+// @version      1.0.2.20241007.5
 // @downloadURL  http://localhost:5000/user-script?file-name=chatgpt.com
 // @match        https://chatgpt.com/*
 // @grant        none
@@ -13,6 +13,7 @@ setTimeout(() => {
 	document.querySelector('div[role=presentation]').removeAttribute('tabIndex')
 }, 1000)
 const observer = new MutationObserver((mutationList) => {
+	// console.log('log from MutationObserver')
 	document.querySelector('div[role=presentation]').removeAttribute('tabIndex')
 })
-observer.observe(document.querySelector('#__next main'), { childList: true })
+observer.observe(document.body, { childList: true })

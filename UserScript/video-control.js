@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         public / video control
-// @version      1.1.18.20240601.2
+// @version      1.1.18.20240601.3
 // @downloadURL  http://localhost:5000/user-script?file-name=video-control
 // @include      *
 // @grant        none
@@ -710,8 +710,8 @@ function addVideoObj (videoElement) {
 function htmlVideoOverlay () {
 	return `
 <${USERSCRIPT_ID}--div id="${USERSCRIPT_ID}" class="${VIDEO_OVERLAY}" tabindex="-1">
-	<div class="${VIDEO_PROGRESS}-container">
-		<!-- <div class="${VIDEO_PROGRESS}-time">00:00:00</div> -->
+	<${USERSCRIPT_ID}--div class="${VIDEO_PROGRESS}-container">
+		<!-- <${USERSCRIPT_ID}--div class="${VIDEO_PROGRESS}-time">00:00:00</div> -->
 		<progress class="${VIDEO_PROGRESS}"></progress>
 		<canvas class="${VIDEO_PROGRESS}-buffering"></canvas>
 	</div>
