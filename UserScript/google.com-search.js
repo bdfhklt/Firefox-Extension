@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         public / google.com search
 // @icon         https://www.google.com/favicon.ico
-// @version      1.0.9.20240228.1
+// @version      1.0.10.20241105.0
 // @downloadURL  http://localhost:5000/user-script?file-name=google.com-search
 // @match        https://www.google.com/*
 // @grant        none
@@ -11,11 +11,10 @@
 // Google USA 전환
 if (location.pathname.startsWith('/search')) {
 	(async () => {
-		const searchButton = await findElementUsingInterval('button[aria-label]')
+		const searchButton = await findElementUsingInterval('#searchform button[type=submit]')
 		if (searchButton !== null) {
-			const searchInputBar = searchButton.parentElement.parentElement
-			searchInputBar.insertAdjacentHTML('beforeend', htmlContent1())
-			searchInputBar.querySelector('#switchButton').addEventListener('click', () => {
+			searchButton.insertAdjacentHTML('afterend', htmlContent1())
+			searchButton.parentElement.querySelector('#switchButton').addEventListener('click', () => {
 				const urlParams = new URLSearchParams(location.search)
 				const urlParam1 = encodeURIComponent(urlParams.get('q'))
 				if (urlParams.get('hl') === 'en') {

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         public / youtube.com watch
 // @icon         https://www.youtube.com/s/desktop/592786db/img/favicon_144x144.png
-// @version      1.0.12.20240407.1
+// @version      1.0.13.20241104.16
 // @downloadURL  http://localhost:5000/user-script?file-name=youtube.com-watch
 // @match        https://www.youtube.com/*
 // @grant        unsafeWindow
@@ -20,17 +20,17 @@ const CONTROL_KNOB_CONTAINER = 'control-knob-container'
 const Player = {
 	_player: null,
 	get player () {
-		if (!this._player) {
-			return (async () => {
+		return (async () => {
+			if (!this._player) {
 				// console.log('get player')
 				const player = await findElementUsingInterval('#movie_player')
 				if (player) {
 					// console.log('find player')
 					this._player = unsafeWindow.document.querySelector('#movie_player')
 				}
-				return this._player
-			})()
-		} else return this._player
+			}
+			return this._player
+		})()
 	},
 
 	State: {
@@ -169,7 +169,7 @@ async function test1 () {
 // 자동재생 해제
 function disableAutoplay () {
 	setTimeout(async () => {
-		const checkedButton = await findElementUsingInterval('.ytp-autonav-toggle-button[aria-checked="true"]', 2000, 5)
+		const checkedButton = await findElementUsingInterval('.ytp-autonav-toggle-button[aria-checked="true"]', 6000, 10)
 		if (checkedButton) {
 			checkedButton.click()
 			console.log(nameof(() => disableAutoplay))
@@ -305,6 +305,35 @@ async function playerControl () {
 		let keyEvent = true
 		let messageText = null
 
+		// ! 화질 설정 api는 2019년 지원 종료로 사용 불가 상태 !
+		function setVideoQuality (nextOrPrev) {
+			const focusedElement = document.activeElement
+
+			player.querySelector('.ytp-settings-button').click()
+			Array.from(player.querySelectorAll('.ytp-menuitem')).filter(el => el.innerText.includes('화질'))[0].click()
+			const currentButton = player.querySelector('.ytp-quality-menu .ytp-menuitem[aria-checked=true]')
+
+			let nextOrPrevButton
+			switch (nextOrPrev) {
+			case 'prev':
+				nextOrPrevButton = currentButton.previousSibling
+				break
+			case 'next':
+				nextOrPrevButton = currentButton.nextSibling
+				break
+			}
+
+			if (nextOrPrevButton) {
+				nextOrPrevButton.click()
+				messageText = nextOrPrevButton.innerText
+			} else {
+				currentButton.click()
+				messageText = currentButton.innerText
+			}
+
+			focusedElement.focus()
+		}
+
 		if (event.type === 'keydown') {
 			switch (event.code) {
 			// 재생, 정지; ! 길게 누르면 2배 재생 기능 추가되면서 keyup event로 변경 됨 !
@@ -393,6 +422,14 @@ async function playerControl () {
 				player.setPlaybackRate(1.0)
 				// console.log(player.getPlaybackRate())
 				messageText = `x${player.getPlaybackRate().toFixed(2)}`
+				break
+
+			// 화질
+			case 'BracketLeft':
+				setVideoQuality('next')
+				break
+			case 'BracketRight':
+				setVideoQuality('prev')
 				break
 
 			default:
