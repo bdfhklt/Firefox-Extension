@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         public / youtube.com watch
 // @icon         https://www.youtube.com/s/desktop/592786db/img/favicon_144x144.png
-// @version      1.0.13.20241104.16
+// @version      1.0.13.20241104.17
 // @downloadURL  http://localhost:5000/user-script?file-name=youtube.com-watch
 // @match        https://www.youtube.com/*
 // @grant        unsafeWindow
@@ -310,7 +310,7 @@ async function playerControl () {
 			const focusedElement = document.activeElement
 
 			player.querySelector('.ytp-settings-button').click()
-			Array.from(player.querySelectorAll('.ytp-menuitem')).filter(el => el.innerText.includes('화질'))[0].click()
+			Array.from(player.querySelectorAll('.ytp-menuitem')).find(el => el.innerText.includes('화질')).click()
 			const currentButton = player.querySelector('.ytp-quality-menu .ytp-menuitem[aria-checked=true]')
 
 			let nextOrPrevButton

@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         public / video control
-// @version      1.1.18.20240601.3
+// @version      1.1.20.20241124.4
 // @downloadURL  http://localhost:5000/user-script?file-name=video-control
 // @include      *
 // @grant        none
@@ -69,7 +69,7 @@ class VideoObj {
 		this.videoElement = videoElement
 		this.videoOverlay = null
 
-		this.addVideoControl()
+		// this.addVideoControl()
 		this.addVideoOverlay()
 	}
 
@@ -266,6 +266,13 @@ class VideoObj {
 				}
 			}
 			break
+
+		case 'mouseup':
+			work = () => { this.videoOverlay.focus() }
+			break
+		case 'mousedown':
+			work = () => { this.videoOverlay.focus() }
+			break
 		}
 
 
@@ -372,6 +379,8 @@ class VideoObj {
 		videoOverlay.addEventListener('keydown', event => this.handleKeyAndMouseEvent(event))
 		videoOverlay.addEventListener('click', event => this.handleKeyAndMouseEvent(event))
 		videoOverlay.addEventListener('auxclick', event => this.handleKeyAndMouseEvent(event))
+		videoOverlay.addEventListener('mouseup', event => this.handleKeyAndMouseEvent(event))
+		videoOverlay.addEventListener('mousedown', event => this.handleKeyAndMouseEvent(event))
 
 		// 클릭시 비디오 포커스
 		// videoProgressContainer.addEventListener('click', () => {
