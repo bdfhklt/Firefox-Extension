@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         public / namu.wiki
 // @icon         https://namu.wiki/favicon.svg
-// @version      1.0.14.20241126.8
+// @version      1.0.17.20241230.2
 // @downloadURL  http://localhost:5000/user-script?file-name=namu.wiki
 // @match        https://namu.wiki/*
 // @grant        GM_setValue
@@ -27,8 +27,10 @@ if (!localStorage.theseed_settings) {
 }
 
 
-document.addEventListener('DOMContentLoaded', event => {
+document.addEventListener('DOMContentLoaded', async event => {
 	// console.log(event)
+
+	await new Promise(resolve => setTimeout(resolve, 1000))
 
 	if (location.pathname.startsWith('/w/')) {
 		// target 찾기
@@ -49,8 +51,9 @@ document.addEventListener('DOMContentLoaded', event => {
 			// }
 
 			const element1 = document.querySelector('[class=""]')
+			console.log(element1)
 			if (element1) {
-				const elementClassName = element1.parentElement.parentElement.className
+				const elementClassName = CSS.escape(element1.parentElement.className)
 				if (elementClassName) {
 					GM_setValue(GM_VALUE_CLASS1_NAME, elementClassName)
 				}
@@ -82,17 +85,6 @@ document.addEventListener('DOMContentLoaded', event => {
 // 	left: 0px;
 // 	width: 100%;
 // 	height: 100%;
-// }
-// `
-// 	)
-// 	document.head.appendChild(document.createElement('style')).innerHTML = (`
-// .${CSS.escape(class1Name)} {
-// 	filter: blur(0.25rem) invert(0.45);
-// 	clip-path: inset(0px);
-// 	user-select: none;
-// }
-// .${CSS.escape(class1Name)} > * {
-// 	pointer-events: none;
 // }
 // `
 // 	)

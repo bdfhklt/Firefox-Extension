@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         public / youtube.com watch
 // @icon         https://www.youtube.com/s/desktop/592786db/img/favicon_144x144.png
-// @version      1.0.13.20241104.17
+// @version      1.0.14.20250501.0
 // @downloadURL  http://localhost:5000/user-script?file-name=youtube.com-watch
 // @match        https://www.youtube.com/*
 // @grant        unsafeWindow
@@ -336,7 +336,7 @@ async function playerControl () {
 
 		if (event.type === 'keydown') {
 			switch (event.code) {
-			// 재생, 정지; ! 길게 누르면 2배 재생 기능 추가되면서 keyup event로 변경 됨 !
+			// 재생, 정지. 길게 누르면 2배 재생 기능 추가되면서 기본 기능은 keyup event로 변경 됨; keyup event에서 무효화
 			case 'Space':
 				if (event.repeat) break
 
@@ -352,7 +352,7 @@ async function playerControl () {
 				}
 				break
 
-			// 탐색
+			// 탐색. keyup event 추가 됨; keyup event에서 무효화
 			case 'ArrowLeft':
 				if (event.shiftKey) {
 					player.seekTo(player.getCurrentTime() - 20)
@@ -436,12 +436,16 @@ async function playerControl () {
 				keyEvent = false
 				break
 			}
-		}
-
-		if (event.type === 'keyup') {
+		} else if (event.type === 'keyup') {
 			switch (event.code) {
-			// 재생, 정지; ! 길게 누르면 2배 재생 기능 추가되면서 keyup event로 변경 됨 !
+			// 재생, 정지. keyup event 무효화
 			case 'Space':
+				break
+
+			// 탐색. keyup event 무효화
+			case 'ArrowLeft':
+				break
+			case 'ArrowRight':
 				break
 
 			default:
