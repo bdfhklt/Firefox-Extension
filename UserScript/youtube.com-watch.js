@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name         public / youtube.com watch
 // @icon         https://www.youtube.com/s/desktop/592786db/img/favicon_144x144.png
-// @version      1.0.14.20250501.0
+// @version      1.0.14.20251028.0
 // @downloadURL  http://localhost:5000/user-script?file-name=youtube.com-watch
 // @match        https://www.youtube.com/*
+// @match        https://www.youtube-nocookie.com/*
 // @grant        unsafeWindow
 // @grant        window.close
 // ==/UserScript==
