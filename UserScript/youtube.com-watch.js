@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         public / youtube.com watch
 // @icon         https://www.youtube.com/s/desktop/592786db/img/favicon_144x144.png
-// @version      1.0.14.20251028.0
+// @version      1.0.16.20260119.3
 // @downloadURL  http://localhost:5000/user-script?file-name=youtube.com-watch
 // @match        https://www.youtube.com/*
 // @match        https://www.youtube-nocookie.com/*
@@ -176,6 +176,18 @@ function disableAutoplay () {
 			console.log(nameof(() => disableAutoplay))
 		}
 	}, 5000)
+}
+
+// 오디오 트랙 원본 선택
+async function selectAudioTrackOriginal () {
+	const player = await Player.player
+	player.querySelector('.ytp-settings-button').click()
+	const menuItemContent = await findElementUsingInterval('.ytp-menuitem-content')
+	if (!Array.from(menuItemContent).find(el => el.innerText.includes('원본'))) {
+		Array.from(player.querySelectorAll('.ytp-menuitem')).find(el => el.innerText.includes('오디오 트랙')).click()
+		Array.from(player.querySelectorAll('.ytp-menuitem')).find(el => el.innerText.includes('원본')).click()
+		console.log(nameof(() => selectAudioTrackOriginal))
+	}
 }
 
 // 동영상 더보기 숨기기
@@ -431,6 +443,11 @@ async function playerControl () {
 				break
 			case 'BracketRight':
 				setVideoQuality('prev')
+				break
+
+			// 음성 원본 선택
+			case 'KeyA':
+				selectAudioTrackOriginal()
 				break
 
 			default:
