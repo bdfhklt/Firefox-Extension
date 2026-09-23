@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         public / GUI overlay
-// @version      1.0.4.20221202.7
+// @version      1.0.4.20221202.8
 // @downloadURL  http://localhost:5000/user-script?file-name=GUI-overlay
 // @include      *
 // @grant        none
@@ -108,7 +108,7 @@ class GuiMessage {
 let guiOverlay = null
 if (window === top) {
 	// CSS
-	document.head.appendChild(document.createElement('style')).innerHTML = (`
+	document.head.appendChild(document.createElement('style')).textContent = (`
 #${USERSCRIPT_ID}.${OVERLAY_BASE} {
 	all: initial;
 	display: block;

@@ -1,8 +1,9 @@
 // ==UserScript==
 // @name         public / ComfyUI frontend
-// @version      1.0.3.20250513.10
+// @version      1.0.3.20260915.0
 // @downloadURL  http://localhost:5000/user-script?file-name=comfyui-frontend
-// @include      http://127.0.0.1:8188/
+// @match      http://127.0.0.1:8188/*
+// @match      http://127.0.0.1:8189/*
 // @grant        none
 // ==/UserScript==
 

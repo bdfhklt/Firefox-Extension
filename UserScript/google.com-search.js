@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         public / google.com search
 // @icon         https://www.google.com/favicon.ico
-// @version      1.0.10.20241105.0
+// @version      1.0.10.20241105.1
 // @downloadURL  http://localhost:5000/user-script?file-name=google.com-search
 // @match        https://www.google.com/*
 // @grant        none
@@ -32,7 +32,7 @@ if (location.pathname.startsWith('/search')) {
 
 // firefox; white space fix from google search bar textarea element
 // CSS
-document.head.appendChild(document.createElement('style')).innerHTML = (`
+document.head.appendChild(document.createElement('style')).textContent = (`
 form[role='search'] textarea {
 	white-space: break-spaces !important;
 }

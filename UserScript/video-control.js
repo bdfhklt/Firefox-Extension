@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         public / video control
-// @version      1.1.20.20241124.4
+// @version      1.1.20.20241124.5
 // @downloadURL  http://localhost:5000/user-script?file-name=video-control
 // @include      *
 // @grant        none
@@ -568,7 +568,7 @@ class VideoObj {
 // main {
 
 // CSS
-document.head.appendChild(document.createElement('style')).innerHTML = (`
+document.head.appendChild(document.createElement('style')).textContent = (`
 #${USERSCRIPT_ID}.${VIDEO_OVERLAY} {
 	all: initial;
 	display: block;

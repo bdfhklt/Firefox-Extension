@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         public / namu.wiki
 // @icon         https://namu.wiki/favicon.svg
-// @version      1.0.17.20241230.2
+// @version      1.0.17.20241230.3
 // @downloadURL  http://localhost:5000/user-script?file-name=namu.wiki
 // @match        https://namu.wiki/*
 // @grant        GM_setValue
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', async event => {
 	}
 
 // 	// CSS 설정
-// 	document.head.appendChild(document.createElement('style')).innerHTML =
+// 	document.head.appendChild(document.createElement('style')).textContent =
 // `div[class=""]>div>table,
 // #search-ad,
 // iframe[src*="/callad"]
@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', async event => {
 	// CSS 설정
 	const class1Name = GM_getValue(GM_VALUE_CLASS1_NAME, 'xxxx')
 	// const dataset1Key = GM_getValue(GM_VALUE_DATASET1_KEY, 'xxxx')
-// 	document.head.appendChild(document.createElement('style')).innerHTML = (`
+// 	document.head.appendChild(document.createElement('style')).textContent = (`
 // .${class1Name} {
 // 	position: relative;
 // }
@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', async event => {
 // }
 // `
 // 	)
-	document.head.appendChild(document.createElement('style')).innerHTML = (`
+	document.head.appendChild(document.createElement('style')).textContent = (`
 .${class1Name} {
 	filter: blur(0.25rem) invert(0.45);
 	clip-path: inset(0px);

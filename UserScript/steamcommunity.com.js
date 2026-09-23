@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         public / steamcommunity.com
 // @icon         https://steamcommunity.com/favicon.ico
-// @version      1.0.0.20221031.1
+// @version      1.0.0.20221031.2
 // @downloadURL  http://localhost:5000/user-script?file-name=steamcommunity.com
 // @match        https://steamcommunity.com/*
 // @grant        none
@@ -11,7 +11,7 @@
 // CSS
 // 창작마당 페이지
 if (location.pathname.startsWith('/workshop/browse')) {
-	document.head.appendChild(document.createElement('style')).innerHTML = `
+	document.head.appendChild(document.createElement('style')).textContent = `
 .workshopItemTitle.ellipsis {
 	white-space: break-spaces;
 }

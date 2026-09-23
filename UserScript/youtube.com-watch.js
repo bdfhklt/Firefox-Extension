@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         public / youtube.com watch
 // @icon         https://www.youtube.com/s/desktop/592786db/img/favicon_144x144.png
-// @version      1.0.16.20260119.3
+// @version      1.0.16.20260119.4
 // @downloadURL  http://localhost:5000/user-script?file-name=youtube.com-watch
 // @match        https://www.youtube.com/*
 // @match        https://www.youtube-nocookie.com/*
@@ -71,7 +71,7 @@ const Player = {
 			knobContainer.append(knob)
 
 			// CSS
-			document.head.appendChild(document.createElement('style')).innerHTML = (`
+			document.head.appendChild(document.createElement('style')).textContent = (`
 #${USERSCRIPT_ID}.${CONTROL_KNOB_CONTAINER} {
 	position: absolute;
 	z-index: 2147483647;
@@ -218,7 +218,7 @@ async function createAutoCloseCheckbox () {
 	if (element1) element1.prepend(checkboxContainer)
 
 	// CSS
-	document.head.appendChild(document.createElement('style')).innerHTML = (`
+	document.head.appendChild(document.createElement('style')).textContent = (`
 #${USERSCRIPT_ID}.${AUTO_CLOSE_CHECKBOX_CONTAINER} {
 	position: relative;
 }
@@ -282,7 +282,7 @@ async function playerControl () {
 // 	if (playerButtonTab) playerButtonTab.append(checkboxContainer)
 
 // 	// CSS
-// 	document.head.appendChild(document.createElement('style')).innerHTML = (`
+// 	document.head.appendChild(document.createElement('style')).textContent = (`
 // #${USERSCRIPT_ID}.${CONTROL_CHECKBOX_CONTAINER} {
 // 	position: absolute;
 // 	z-index: 2147483647;
